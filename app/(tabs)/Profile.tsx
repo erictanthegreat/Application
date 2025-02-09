@@ -1,14 +1,14 @@
 import React from "react";
 
-import { SafeAreaView } from "react-native";
-import { View, Text } from "../../components/Themed";
+import { SafeAreaView, Text } from "react-native";
+import { View } from "../../components/Themed";
 
 export default function TabTwoScreen() {
     return (
         <>
             <SafeAreaView>
                 <View>
-                    <Text>Hello world!</Text>
+                    <Text className="text-red-500">wassup</Text>
                 </View>
             </SafeAreaView>
         </>
