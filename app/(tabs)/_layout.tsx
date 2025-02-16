@@ -41,6 +41,10 @@ export default function TabLayout() {
                 </Pressable>
             </Link>
         ),
+
+        headerStyle: {
+            borderBottomWidth: 0,
+        },
     };
 
     return (
@@ -50,6 +54,7 @@ export default function TabLayout() {
                 headerShown: useClientOnlyValue(false, true), // Hide the header on web
             }}
         >
+
             <Tabs.Screen
                 name="Home"
                 options={{
@@ -63,6 +68,7 @@ export default function TabLayout() {
                     ...tabOptions, 
                 }}
             />
+            
             <Tabs.Screen
                 name="Create"
                 options={{

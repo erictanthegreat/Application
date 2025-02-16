@@ -1,16 +1,17 @@
 import React from "react";
+import { Platform } from "react-native";
+import { Text, View } from "../../components/Themed";
+import { StatusBar } from "expo-status-bar";
 
-import { SafeAreaView, Text } from "react-native";
-import { View } from "../../components/Themed";
-
-export default function TabTwoScreen() {
+export default function Home() {
     return (
-        <>
-            <SafeAreaView>
-                <View>
-                    <Text className="text-red-500">Yo world</Text>
-                </View>
-            </SafeAreaView>
-        </>
+        <View>
+            <View className="h-screen flex justify-center items-center gap-[10px]">
+                <Text>Yo world 👋</Text>
+            </View>
+
+            {/* Use a light status bar on iOS to account for the black space above the modal */}
+            <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
+        </View>
     );
 }
