@@ -13,7 +13,7 @@ export default function Profile() {
 
   return (
     <SafeAreaView>
-      <View style={styles.container}>
+      <View className="h-screen flex p-5 items-center gap-[10px]">
         
         <Image
           source={require('../../assets/images/Profile_icon.png')}
@@ -35,13 +35,7 @@ export default function Profile() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    padding: 25,
-  },
-
+  
   image: {
     height: 100,
     width: 100,
