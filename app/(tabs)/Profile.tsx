@@ -1,15 +1,10 @@
 import React from "react";
-
-import { SafeAreaView, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { SafeAreaView, Text, StyleSheet } from "react-native";
 import { View } from "../../components/Themed";
 import { Image } from 'expo-image';
+import { Link } from "expo-router";  // Import Link from expo-router for navigation
 
 export default function Profile() {
-
-  // Placeholder function for button press
-  const handlePress = () => {
-    // Placeholder for future functionality
-  };
 
   return (
     <SafeAreaView>
@@ -24,10 +19,11 @@ export default function Profile() {
           <Text style={styles.nameText}>John Doe</Text>
           <Text style={styles.emailText}>johndoe@gmail.com</Text>
         </View>
-        
-        <TouchableOpacity style={styles.button} onPress={handlePress}>
+
+        {/* Using Link for navigation */}
+        <Link href="/Profile/EditProfile" style={styles.button}>
           <Text style={styles.buttonText}>Edit Profile</Text>
-        </TouchableOpacity>
+        </Link>
 
       </View>
     </SafeAreaView>
@@ -35,7 +31,6 @@ export default function Profile() {
 }
 
 const styles = StyleSheet.create({
-  
   image: {
     height: 100,
     width: 100,
@@ -67,6 +62,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 25,
     alignItems: 'center',
+    marginTop: 20,  // Added margin to separate from other content
   },
 
   buttonText: {
