@@ -9,7 +9,7 @@ import React from "react";
 import { SafeAreaView, Text, StyleSheet } from "react-native";
 import { View } from "../../components/Themed";
 import { Image } from 'expo-image';
-import { Link } from "expo-router";  // Import Link from expo-router for navigation
+import { Link } from "expo-router";
 
 export default function Profile() {
 
@@ -31,12 +31,11 @@ export default function Profile() {
           <Text style={styles.buttonText}>Edit Profile</Text>
         </Link>
 
-        {/* Container for 5 buttons */}
         <View style={styles.buttonContainer}>
 
-        <View style={styles.headerContainer}>
-    <Text style={styles.headerText}>Preferences</Text>
-  </View>
+          <View style={styles.headerContainer}>
+            <Text style={styles.headerText}>Preferences</Text>
+          </View>
 
           <View style={styles.separator} />
           
@@ -104,7 +103,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: '100%',
     backgroundColor: '#FBFBFB',
-    borderRadius: 10,
+    borderRadius: 0,
     paddingVertical: 12,
     paddingHorizontal: 15,
     borderColor: '#D1D1D1',
@@ -113,7 +112,7 @@ const styles = StyleSheet.create({
 
   headerContainer: {
     paddingVertical: 12,
-    paddingHorizontal: 15,
+    paddingHorizontal: 10,
   },
 
   headerText: {
