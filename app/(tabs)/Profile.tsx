@@ -1,3 +1,10 @@
+/* Authored by: Eric Tan Jr.
+Company: Nvchads
+Project: InvenTori
+Feature: [FEATURECODE-003] Profile Screen
+Description: Let's the user to check their profile and settings.
+ */
+
 import React from "react";
 import { SafeAreaView, Text, StyleSheet } from "react-native";
 import { View } from "../../components/Themed";
@@ -20,10 +27,33 @@ export default function Profile() {
           <Text style={styles.emailText}>johndoe@gmail.com</Text>
         </View>
 
-        {/* Using Link for navigation */}
-        <Link href="/Profile/EditProfile" style={styles.button}>
+        <Link href="/Profile/EditProfile" style={styles.editButton}>
           <Text style={styles.buttonText}>Edit Profile</Text>
         </Link>
+
+        {/* Container for 5 buttons */}
+        <View style={styles.buttonContainer}>
+
+        <View style={styles.headerContainer}>
+    <Text style={styles.headerText}>Preferences</Text>
+  </View>
+
+          <View style={styles.separator} />
+          
+          {['Push Notifications', 'Language & Region', 'Support', 'About', 'Logout'].map((label, index) => (
+            
+            <View key={index}>
+              
+              <Link href="#" style={styles.settingButton}>
+                <Text style={styles.settingButtonText}>{label}</Text>
+              </Link>
+
+              {index < 4 && <View style={styles.separator} />}
+            </View>
+
+          ))}
+
+        </View>
 
       </View>
     </SafeAreaView>
@@ -37,12 +67,12 @@ const styles = StyleSheet.create({
     borderRadius: 85,
     borderWidth: 2,
     borderColor: '#D1D1D1',
-    marginBottom: 20,
+    marginBottom: 15,
   },
 
   textContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 15,
   },
 
   nameText: {
@@ -56,18 +86,56 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  button: {
+  editButton: {
     backgroundColor: '#BB002D',
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 25,
     alignItems: 'center',
-    marginTop: 20,  // Added margin to separate from other content
+    marginVertical: 10,
   },
 
   buttonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+
+  buttonContainer: {
+    width: '100%',
+    backgroundColor: '#FBFBFB',
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderColor: '#D1D1D1',
+    borderWidth: 1,
+  },
+
+  headerContainer: {
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+  },
+
+  headerText: {
+    fontSize: 20,
+    fontWeight: 700,
+    color: '#242424',
+  },
+
+  settingButton: {
+    backgroundColor: '#FBFBFB',
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+  },
+
+  settingButtonText: {
+    color: '#000000',
+    fontSize: 16,
+  },
+
+  separator: {
+    height: 1,
+    backgroundColor: '#D1D1D1',
+    marginVertical: 5,
   },
 });
