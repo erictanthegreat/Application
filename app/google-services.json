@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "312913552975",
+    "project_id": "inventori-nvchads",
+    "storage_bucket": "inventori-nvchads.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:312913552975:android:80e12c5e23753549002c3a",
+        "android_client_info": {
+          "package_name": "com.nvchads.inventori"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRe1RqIRPkUcfSWvQTIx4NwpAhHWqjVxM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

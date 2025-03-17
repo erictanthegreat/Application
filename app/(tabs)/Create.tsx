@@ -2,6 +2,7 @@ import React from "react";
 import { Platform } from "react-native";
 import { Text, View } from "../../components/Themed";
 import { StatusBar } from "expo-status-bar";
+import { auth } from "../config/firebaseConfig";
 
 export default function Home() {
     return (
