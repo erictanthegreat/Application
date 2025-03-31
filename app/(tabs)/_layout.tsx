@@ -73,6 +73,30 @@ export default function TabLayout() {
             />
 
             <Tabs.Screen
+                name="Boxes"
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <View style={{ flexDirection: "column", alignItems: "center" }}>
+                            <Feather name="package" size={size} color={color} />
+                        </View>
+                    ),
+                    tabBarLabel: "Boxes",
+                    headerTitle: () => (
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                            <Image
+                                source={require('../../assets/images/Logo.svg')}
+                                style={{ width: 30, height: 30, marginRight: 8 }}
+                            />
+
+                            <Text style={{ fontSize: 20, color: "#242424", fontWeight: "600" }}>Inven</Text>
+                            <Text style={{ fontSize: 20, color: "#BB002D", fontWeight: "600" }}>Tori</Text>
+                        </View>
+                    ),
+                    ...tabOptions,
+                }}
+            />
+
+            <Tabs.Screen
                 name="Create"
                 options={{
                     tabBarIcon: ({ color, size }) => (
@@ -103,6 +127,30 @@ export default function TabLayout() {
                     ),
                     tabBarLabel: "",
                     tabBarActiveTintColor: "#BB002D",
+                    ...tabOptions,
+                }}
+            />
+
+            <Tabs.Screen
+                name="Notifications"
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <View style={{ flexDirection: "column", alignItems: "center" }}>
+                            <Feather name="bell" size={size} color={color} />
+                        </View>
+                    ),
+                    tabBarLabel: "Notifications",
+                    headerTitle: () => (
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                            <Image
+                                source={require('../../assets/images/Logo.svg')}
+                                style={{ width: 30, height: 30, marginRight: 8 }}
+                            />
+
+                            <Text style={{ fontSize: 20, color: "#242424", fontWeight: "600" }}>Inven</Text>
+                            <Text style={{ fontSize: 20, color: "#BB002D", fontWeight: "600" }}>Tori</Text>
+                        </View>
+                    ),
                     ...tabOptions,
                 }}
             />

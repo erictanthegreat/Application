@@ -43,7 +43,7 @@ export default function Profile() {
             
             <View key={index}>
               
-              <Link href="#" style={styles.settingButton}>
+              <Link href="/+not-found" style={styles.settingButton}>
                 <Text style={styles.settingButtonText}>{label}</Text>
               </Link>
 
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: '100%',
     backgroundColor: '#FBFBFB',
-    borderRadius: 0,
+    borderRadius: 20,
     paddingVertical: 12,
     paddingHorizontal: 15,
     borderColor: '#D1D1D1',
