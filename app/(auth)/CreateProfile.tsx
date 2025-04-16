@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { auth, db } from "../config/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 export default function CreateProfile() {
     const [fullName, setFullName] = useState("");
@@ -59,11 +59,16 @@ export default function CreateProfile() {
             const user = userCredential.user;
 
             // Store user info in Firestore
-            await setDoc(doc(db, "users", user.uid), { fullName, email });
+            await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
+                fullName,
+                email,
+                createdAt: serverTimestamp(),
+            });
 
             Alert.alert("Success", "Account created! Please log in.");
             auth.signOut();
-            router.replace("/Login"); // Redirect to Login page
+            router.replace("/Login");
 
         } catch (error: any) {
             if (error.code === "auth/email-already-in-use") {
@@ -123,6 +128,8 @@ export default function CreateProfile() {
                     setErrors((prevErrors) => ({ ...prevErrors, confirmPassword: undefined }));
                 }}
                 secureTextEntry
+                returnKeyType="go"
+                onSubmitEditing={handleSignUp}
                 className="border border-gray-300 w-full p-3 rounded-lg mt-3"
             />
             {errors.confirmPassword && <Text className="text-red-500 text-sm mt-1">{errors.confirmPassword}</Text>}
