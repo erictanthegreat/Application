@@ -6,12 +6,25 @@ Description: Let's the user to check their profile and settings.
  */
 
 import React from "react";
-import { SafeAreaView, Text, StyleSheet } from "react-native";
+import { SafeAreaView, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { View } from "../../components/Themed";
 import { Image } from 'expo-image';
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
+import { signOut } from "firebase/auth";
+import { auth } from "../config/firebaseConfig";
 
 export default function Profile() {
+
+const router = useRouter();
+
+const handleLogout = async() => {
+  try {
+    await signOut(auth);
+    router.replace("../(auth)/Login");
+  } catch (error) {
+    console.error("Error Logging Out: ", error);
+  }
+};
 
   return (
     <SafeAreaView>
@@ -42,14 +55,17 @@ export default function Profile() {
           {['Push Notifications', 'Language & Region', 'Support', 'About', 'Logout'].map((label, index) => (
             
             <View key={index}>
-              
+              {label == 'Logout' ? (
+              <TouchableOpacity onPress={handleLogout} style={styles.settingButton}>
+                <Text style={styles.settingButtonText}>{label}</Text>
+              </TouchableOpacity>
+            ) : (
               <Link href="/+not-found" style={styles.settingButton}>
                 <Text style={styles.settingButtonText}>{label}</Text>
               </Link>
-
+            )}
               {index < 4 && <View style={styles.separator} />}
             </View>
-
           ))}
 
         </View>
