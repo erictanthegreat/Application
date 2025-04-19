@@ -25,6 +25,9 @@ export default function CreateProfile() {
         if (!email) {
             newErrors.email = "Email is required.";
             valid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            newErrors.email = "Please enter a valid email address.";
+            valid = false;
         }
         if (!password) {
             newErrors.password = "Password is required.";
@@ -71,12 +74,17 @@ export default function CreateProfile() {
             router.replace("/Login");
 
         } catch (error: any) {
+            console.error("Sign Up Error:", error); // 👈 log the error
+        
             if (error.code === "auth/email-already-in-use") {
                 setErrors((prevErrors) => ({ ...prevErrors, email: "This email is already in use." }));
+            } else if (error.code === "auth/invalid-email") {
+                setErrors((prevErrors) => ({ ...prevErrors, email: "Invalid email format." }));
             } else {
                 Alert.alert("Sign Up Failed", error.message);
             }
         }
+        
 
         setLoading(false);
     };
