@@ -52,11 +52,15 @@ export default function AddItemScreen() {
       return;
     }
 
-    const isDuplicate = await checkDuplicateItem(title);
-    if (isDuplicate) {
-      Alert.alert("Duplicate Item", "An item with the same name already exists.");
-      return;
-    }
+const duplicate = addedItems.find(
+  (item) => item.title.trim().toLowerCase() === title.trim().toLowerCase() &&
+            (!isEditing || item.id !== editingItemId)
+);
+
+if (duplicate) {
+  Alert.alert("Duplicate Item", "An item with the same title already exists.");
+  return;
+}
 
     let imageURL = "https://via.placeholder.com/200x200.png?text=No+Image";
 
