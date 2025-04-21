@@ -1,27 +1,62 @@
-/* Authored by: Eric Tan Jr.
-Company: Nvchads
-Project: InvenTori
-Feature: [FEATURECODE-002] Create Screen
-Description: Let's the user create a content to track.
- */
-
 import React, { useState } from 'react';
 import { Platform } from "react-native";
-import { View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert} from 'react-native';
 import { StatusBar } from "expo-status-bar";
-import { auth } from "../config/firebaseConfig";
+import { db, auth } from "../config/firebaseConfig";
+import { useRouter } from "expo-router";
+import { collection, addDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
 
-export default function Home() {
-  const [selectedItem, setSelectedItem] = useState('Perishables');
+const items = [
+  { name: 'Furniture', emoji: '🛋️' },
+  { name: 'Devices', emoji: '💻' },
+  { name: 'Appliances', emoji: '🧊' },
+  { name: 'Papers', emoji: '📄' },
+  { name: 'Perishables', emoji: '🍋' },
+  { name: 'Others', emoji: '📦' },
+];
 
-  const items = [
-    { name: 'Furniture', emoji: '🛋️' },
-    { name: 'Devices', emoji: '💻' },
-    { name: 'Appliances', emoji: '🧊' },
-    { name: 'Papers', emoji: '📄' },
-    { name: 'Perishables', emoji: '🍋' },
-    { name: 'Others', emoji: '📦' },
-  ];
+export default function CreateBox() {
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [BoxName, setBoxName] = useState("");
+  const router = useRouter();
+
+  const handleConfirm = async () => {
+    if (!selectedItem) {
+      Alert.alert("Please select a category");
+      return;
+    }
+
+    try {
+      // Check if the box name already exists
+      const boxQuery = query(
+        collection(db, "boxes"),
+        where("boxName", "==", BoxName)
+      );
+      const querySnapshot = await getDocs(boxQuery);
+
+      if (!querySnapshot.empty) {
+        // Box with the same name already exists
+        Alert.alert("Error creating box", "A box with this name already exists. Please choose a different name.");
+        return;
+      }
+
+      const boxRef = await addDoc(collection(db, "boxes"), {
+        category: selectedItem,
+        createdAt: serverTimestamp(),
+        userID: auth.currentUser?.uid || null,
+        boxName: BoxName,
+      });
+
+      router.push({
+        pathname: "/Boxes/AddItems",
+        params: { boxId: boxRef.id },
+      });
+
+    } catch (error: any) {
+      console.error("Error creating box:", error);
+      Alert.alert("Error", "Something went wrong. Try again.");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -44,8 +79,25 @@ export default function Home() {
           );
         })}
       </View>
-       {/* Use a light status bar on iOS to account for the black space above the modal */}
-       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
+
+      <TextInput
+        placeholder="Box Name"
+        value={BoxName}
+        onChangeText={(text) => {
+          setBoxName(text);
+        }}
+        className="border border-gray-300 w-full p-3 rounded-lg"
+      />
+      
+      <TouchableOpacity
+        className="mt-10 bg-blue-600 px-6 py-3 rounded-full"
+        onPress={handleConfirm}
+      >
+        <Text className="text-white font-semibold text-base">Confirm Category</Text>
+      </TouchableOpacity>
+      
+      {/* Use a light status bar on iOS to account for the black space above the modal */}
+      <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
     </View>
   );
 }
@@ -56,6 +108,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     flex: 1,
     backgroundColor: '#fff',
+    alignItems: "center"
   },
   logo: {
     fontSize: 18,
@@ -109,4 +162,7 @@ const styles = StyleSheet.create({
     color: '#f12d6c',
     fontWeight: 'bold',
   },
+  confirmButton: {
+    
+  }
 });
