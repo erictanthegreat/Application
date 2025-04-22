@@ -47,8 +47,8 @@ export default function AddItemScreen() {
   };
 
   const handleUpload = async () => {
-    if (!title || !description || !quantity) {
-      Alert.alert("Please complete all fields.");
+    if (!title || !quantity) {
+      Alert.alert("Please fill out the Item Name and Quantity.");
       return;
     }
 

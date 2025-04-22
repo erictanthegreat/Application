@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Platform } from "react-native";
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert} from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert, ScrollView } from 'react-native';
 import { StatusBar } from "expo-status-bar";
 import { db, auth } from "../config/firebaseConfig";
 import { useRouter } from "expo-router";
@@ -59,7 +59,7 @@ export default function CreateBox() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ padding: 16, gap: 16 }}>
       <Text style={styles.title}>Choose</Text>
       <Text style={styles.subtitle}>an item type</Text>
 
@@ -98,7 +98,7 @@ export default function CreateBox() {
       
       {/* Use a light status bar on iOS to account for the black space above the modal */}
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
-    </View>
+    </ScrollView>
   );
 }
 
