@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { auth, db } from "../config/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
@@ -151,6 +151,7 @@ export default function CreateProfile() {
                     {loading ? "Creating Account..." : "Sign Up"}
                 </Text>
             </TouchableOpacity>
+            <Link href="/Login">Already have an account? Login here!</Link>
         </View>
     );
 }

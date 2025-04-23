@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image, Alert, ScrollView } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { storage, db } from "../config/firebaseConfig";
+import { collection, addDoc, updateDoc, doc, deleteDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
+import { db } from "../config/firebaseConfig";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import uuid from "react-native-uuid";
 
@@ -13,63 +12,185 @@ export default function AddItemScreen() {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [uploading, setUploading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [addedItems, setAddedItems] = useState<any[]>([]);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
   const { boxId } = useLocalSearchParams<{ boxId: string }>();
   const router = useRouter();
 
   const pickImage = async (fromCamera = false) => {
-    const result = fromCamera
-      ? await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.7 })
-      : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.7 });
+    let permissionResult;
+    permissionResult = fromCamera
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (!result.canceled && result.assets?.length > 0) {
+    if (!permissionResult.granted) {
+      Alert.alert("Permission required", "You need to grant permission to access media.");
+      return;
+    }
+
+    const result = fromCamera
+      ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 1 })
+      : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 1 });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
       setImage(result.assets[0].uri);
     }
   };
 
+  const checkDuplicateItem = async (title: string) => {
+    const itemsRef = collection(db, "boxes", boxId, "items");
+    const q = query(itemsRef, where("title", "==", title));
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty; 
+  };
+
   const handleUpload = async () => {
-    if (!image || !title || !description || !quantity) {
-      Alert.alert("Please complete all fields.");
+    if (!title || !quantity) {
+      Alert.alert("Please fill out the Item Name and Quantity.");
       return;
     }
 
+const duplicate = addedItems.find(
+  (item) => item.title.trim().toLowerCase() === title.trim().toLowerCase() &&
+            (!isEditing || item.id !== editingItemId)
+);
+
+if (duplicate) {
+  Alert.alert("Duplicate Item", "An item with the same title already exists.");
+  return;
+}
+
+    let imageURL = "https://via.placeholder.com/200x200.png?text=No+Image";
+
     try {
       setUploading(true);
-      const response = await fetch(image);
-      const blob = await response.blob();
-      const filename = `${uuid.v4()}.jpg`;
-      const imageRef = ref(storage, `boxes/${boxId}/${filename}`);
-      await uploadBytes(imageRef, blob);
-      const imageURL = await getDownloadURL(imageRef);
 
-      // Save item to Firestore
-      await addDoc(collection(db, "boxes", boxId, "items"), {
-        title,
-        description,
-        quantity: parseInt(quantity),
-        imageURL,
-        createdAt: serverTimestamp(),
-      });
+      if (image) {
+        const formData = new FormData();
+        formData.append("file", {
+          uri: image,
+          type: "image/jpeg",
+          name: `${uuid.v4()}.jpg`,
+        } as any);
+        formData.append("upload_preset", "unsigned_upload");
+        formData.append("cloud_name", "dzqc9kcyi");
 
-      Alert.alert("Item Added!");
+        const res = await fetch("https://api.cloudinary.com/v1_1/dzqc9kcyi/image/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (!data.secure_url) throw new Error("Image upload failed. Please try again.");
+        imageURL = data.secure_url;
+      }
+
+      if (isEditing && editingItemId) {
+        const editingItem = addedItems.find(item => item.id === editingItemId);
+
+        if (editingItem?.isUploaded) {
+          const itemDocRef = doc(db, "boxes", boxId, "items", editingItemId);
+          await updateDoc(itemDocRef, {
+            title,
+            description,
+            quantity: parseInt(quantity),
+            imageURL,
+            updatedAt: serverTimestamp(),
+          });
+
+          Alert.alert("Item Updated!");
+        } else {
+          Alert.alert("Preview item updated!");
+        }
+
+        // Always update UI
+        setAddedItems((prev) =>
+          prev.map((item) =>
+            item.id === editingItemId ? { ...item, title, description, quantity, imageURL } : item
+          )
+        );
+
+        setIsEditing(false);
+        setEditingItemId(null);
+      } else {
+        const newDocRef = await addDoc(collection(db, "boxes", boxId, "items"), {
+          title,
+          description,
+          quantity: parseInt(quantity),
+          imageURL,
+          createdAt: serverTimestamp(),
+        });
+
+        setAddedItems((prev) => [
+          ...prev,
+          { id: newDocRef.id, title, description, quantity, imageURL, isUploaded: true },
+        ]);
+
+        Alert.alert("Item Added!");
+      }
+
       setImage(null);
       setTitle("");
       setDescription("");
       setQuantity("1");
-
     } catch (error: any) {
       console.error("Upload failed:", error);
-      Alert.alert("Upload failed", error.message);
+      Alert.alert("Upload failed", error.message || "Something went wrong.");
+    } finally {
+      setUploading(false);
     }
-
-    setUploading(false);
   };
 
-  return (
-    <View className="flex-1 p-4 gap-4 bg-white">
-      <Text className="text-2xl font-bold text-center">Add Item</Text>
+  const handleEdit = (item: any) => {
+    setIsEditing(true);
+    setEditingItemId(item.id);
+    setTitle(item.title);
+    setDescription(item.description);
+    setQuantity(item.quantity.toString());
+    setImage(item.imageURL);
+  };
 
-      {image && <Image source={{ uri: image }} style={{ width: "100%", height: 200, borderRadius: 10 }} />}
+  const handleDelete = async (itemId: string) => {
+    Alert.alert(
+      "Confirm Deletion",
+      "Are you sure you want to delete this item?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel", 
+        },
+        {
+          text: "Delete",
+          style: "destructive", 
+          onPress: async () => {
+            try {
+              const itemDocRef = doc(db, "boxes", boxId, "items", itemId);
+              await deleteDoc(itemDocRef);
+  
+              setAddedItems((prev) => prev.filter((item) => item.id !== itemId));
+  
+              Alert.alert("Item Deleted", "The item has been deleted.");
+            } catch (error) {
+              console.error("Error deleting item: ", error);
+              Alert.alert("Error", "Failed to delete the item. Please try again.");
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+  
+  return (
+    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ padding: 16, gap: 16 }}>
+      <Text className="text-2xl font-bold text-center">Add/Edit Item</Text>
+
+      <Image
+        source={{ uri: image || "https://via.placeholder.com/200x200.png?text=No+Image" }}
+        style={{ width: "100%", height: 200, borderRadius: 10 }}
+      />
 
       <View className="flex-row justify-between">
         <TouchableOpacity onPress={() => pickImage(false)} className="bg-gray-200 p-3 rounded-lg flex-1 mr-2">
@@ -97,20 +218,40 @@ export default function AddItemScreen() {
       <TextInput
         placeholder="Quantity"
         value={quantity}
-        onChangeText={setQuantity}
-        keyboardType="number-pad"
+        onChangeText={(text) => { if (/^\d*$/.test(text)) setQuantity(text); }}
+        keyboardType="numeric"
         className="border border-gray-300 p-3 rounded-lg"
       />
 
-      <TouchableOpacity
-        onPress={handleUpload}
-        disabled={uploading}
-        className="bg-blue-500 p-4 rounded-lg mt-2"
-      >
+      <TouchableOpacity onPress={handleUpload} disabled={uploading} className="bg-blue-500 p-4 rounded-lg mt-2">
         <Text className="text-white text-center font-semibold">
-          {uploading ? "Uploading..." : "Add Item"}
+          {uploading ? "Uploading..." : isEditing ? "Update Item" : "Add Item"}
         </Text>
       </TouchableOpacity>
-    </View>
+
+      <TouchableOpacity onPress={() => router.push("../(tabs)/Home")} className="bg-green-600 p-4 rounded-lg mt-4">
+        <Text className="text-white text-center font-semibold">Confirm Items</Text>
+      </TouchableOpacity>
+
+      <View className="mt-4">
+        {addedItems.map((item, index) => (
+          <View key={index} className="border p-3 rounded-lg bg-gray-100 mt-2">
+            <Image source={{ uri: item.imageURL }} style={{ width: "100%", height: 150, borderRadius: 10 }} />
+            <Text className="font-bold mt-2">{item.title}</Text>
+            <Text>{item.description}</Text>
+            <Text>Quantity: {item.quantity}</Text>
+
+            <TouchableOpacity onPress={() => handleEdit(item)} className="bg-yellow-500 p-2 rounded-lg mt-2">
+              <Text className="text-white">Edit</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => handleDelete(item.id)} className="bg-red-500 p-2 rounded-lg">
+              <Text className="text-white">Delete</Text>
+            </TouchableOpacity>
+
+          </View>
+        ))}
+      </View>
+    </ScrollView>
   );
 }

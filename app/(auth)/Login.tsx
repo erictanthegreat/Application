@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { auth } from "../config/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
@@ -30,7 +30,6 @@ export default function Login() {
 
             const newErrors: typeof errors = {};
 
-            // Safely extract Firebase error code
             const errorCode = error?.code;
 
             switch (errorCode) {
@@ -69,7 +68,7 @@ export default function Login() {
                 }}
                 keyboardType="email-address"
                 autoCapitalize="none"
-                className="border border-gray-300 w-full p-3 rounded-lg"
+                className="login-email"
             />
             {errors.email && <Text className="text-red-500 text-sm mt-1">{errors.email}</Text>}
 
@@ -83,7 +82,7 @@ export default function Login() {
                 secureTextEntry
                 returnKeyType="go"
                 onSubmitEditing={handleLogin}
-                className="border border-gray-300 w-full p-3 rounded-lg mt-3"
+                className="login-password"
             />
 
             {errors.password && <Text className="text-red-500 text-sm mt-1">{errors.password}</Text>}
@@ -93,12 +92,13 @@ export default function Login() {
             <TouchableOpacity
                 onPress={handleLogin}
                 disabled={loading}
-                className="bg-blue-500 w-full p-3 rounded-lg mt-5"
+                className="login-button"
             >
-                <Text className="text-white text-center font-semibold">
+                <Text className="login-message">
                     {loading ? "Logging in..." : "Login"}
                 </Text>
             </TouchableOpacity>
+            <Link href="/CreateProfile">Don't have an account? Sign up here!</Link>
         </View>
     );
 }
