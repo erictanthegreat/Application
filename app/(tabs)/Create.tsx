@@ -22,10 +22,15 @@ export default function CreateBox() {
 
   const handleConfirm = async () => {
     if (!selectedItem) {
-      Alert.alert("Please select a category");
+      Alert.alert("Error creating box", "Please select a category");
       return;
     }
-
+  
+    if (!BoxName.trim()) {
+      Alert.alert("Error creating box", "Please enter a box name.");
+      return;
+    }
+  
     try {
       // Check if the box name already exists
       const boxQuery = query(
@@ -33,30 +38,31 @@ export default function CreateBox() {
         where("boxName", "==", BoxName)
       );
       const querySnapshot = await getDocs(boxQuery);
-
+  
       if (!querySnapshot.empty) {
         // Box with the same name already exists
         Alert.alert("Error creating box", "A box with this name already exists. Please choose a different name.");
         return;
       }
-
+  
       const boxRef = await addDoc(collection(db, "boxes"), {
         category: selectedItem,
         createdAt: serverTimestamp(),
         userID: auth.currentUser?.uid || null,
-        boxName: BoxName,
+        boxName: BoxName.trim(),
       });
-
+  
       router.push({
         pathname: "/Boxes/AddItems",
         params: { boxId: boxRef.id },
       });
-
+  
     } catch (error: any) {
       console.error("Error creating box:", error);
       Alert.alert("Error", "Something went wrong. Try again.");
     }
   };
+  
 
   return (
     <ScrollView className="flex-1 bg-white" contentContainerStyle={{ padding: 16, gap: 16 }}>
