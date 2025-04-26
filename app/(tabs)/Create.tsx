@@ -18,6 +18,7 @@ const items = [
 export default function CreateBox() {
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [BoxName, setBoxName] = useState("");
+  const [boxDescription, setBoxDescription] = useState("");
   const router = useRouter();
 
   const handleConfirm = async () => {
@@ -50,8 +51,9 @@ export default function CreateBox() {
         createdAt: serverTimestamp(),
         userID: auth.currentUser?.uid || null,
         boxName: BoxName.trim(),
+        description: boxDescription.trim() || null, 
       });
-  
+      
       router.push({
         pathname: "/Boxes/AddItems",
         params: { boxId: boxRef.id },
@@ -89,11 +91,17 @@ export default function CreateBox() {
       <TextInput
         placeholder="Box Name"
         value={BoxName}
-        onChangeText={(text) => {
-          setBoxName(text);
-        }}
+        onChangeText={(text) => setBoxName(text)}
         className="border border-gray-300 w-full p-3 rounded-lg"
       />
+
+      <TextInput
+        placeholder="Box Description (optional)"
+        value={boxDescription}
+        onChangeText={(text) => setBoxDescription(text)}
+        className="border border-gray-300 w-full p-3 rounded-lg"
+      />
+
       
       <TouchableOpacity
         className="mt-10 bg-blue-600 px-6 py-3 rounded-full"
