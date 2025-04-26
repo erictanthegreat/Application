@@ -68,7 +68,7 @@ export default function Login() {
                 }}
                 keyboardType="email-address"
                 autoCapitalize="none"
-                className="login-email"
+                className="border border-gray-300 w-full p-3 rounded-lg"
             />
             {errors.email && <Text className="text-red-500 text-sm mt-1">{errors.email}</Text>}
 
@@ -82,7 +82,7 @@ export default function Login() {
                 secureTextEntry
                 returnKeyType="go"
                 onSubmitEditing={handleLogin}
-                className="login-password"
+                className="border border-gray-300 w-full p-3 rounded-lg mt-3"
             />
 
             {errors.password && <Text className="text-red-500 text-sm mt-1">{errors.password}</Text>}
@@ -92,7 +92,7 @@ export default function Login() {
             <TouchableOpacity
                 onPress={handleLogin}
                 disabled={loading}
-                className="login-button"
+                className="bg-blue-500 w-full p-3 rounded-lg mt-5"
             >
                 <Text className="login-message">
                     {loading ? "Logging in..." : "Login"}
