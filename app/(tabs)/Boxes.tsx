@@ -27,8 +27,8 @@ export default function Home() {
           <Text style={styles.subtitle}>This is the Boxes screen</Text>
         </View>
         <View style={styles.headerIcons}>
-          <Feather name="search" size={24} color="#000" style={{ marginRight: 15 }} />
-          <Feather name="list" size={24} color="#000" />
+          <Feather name="search" size={30} color="#000" style={{ marginRight: 15 }} />
+          <Feather name="list" size={30} color="#000" />
         </View>
       </View>
 
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 40,
+    paddingTop: 20,
   },
   header: {
     flexDirection: "row",
@@ -81,7 +81,8 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 20,
+    fontWeight: "600",
     color: "#595959",
     marginTop: 2,
   },
