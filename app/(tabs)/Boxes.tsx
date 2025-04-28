@@ -5,155 +5,125 @@ Feature: [FEATURECODE-001] Boxes Screen
 Description: Let's the user see all of their boxes/containers.
  */
 
-import React from "react";
-import { Platform, ScrollView, TouchableOpacity, StyleSheet, Image } from "react-native";
-import { Text, View } from "../../components/Themed";
-import { StatusBar } from "expo-status-bar";
-import Feather from "react-native-vector-icons/Feather";
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, ScrollView, TouchableOpacity, View, Text, ActivityIndicator } from 'react-native';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db, auth } from '../config/firebaseConfig';
+import { useRouter } from 'expo-router';
 
-export default function Home() {
-  const perishables = [
-    { name: "Box of apples, to expire on...", icon: "https://cdn-icons-png.flaticon.com/512/415/415682.png" },
-    { name: "Box of grapes, to expire on...", icon: "https://cdn-icons-png.flaticon.com/512/765/765560.png" },
-    { name: "Box of oranges, to expire on...", icon: "https://cdn-icons-png.flaticon.com/512/4899/4899184.png" }
-  ];
+interface Box {
+  id: string;
+  category: string;
+  boxName: string;
+}
+
+export default function ViewBoxes() {
+  const [boxes, setBoxes] = useState<Box[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchBoxes = async () => {
+      try {
+        const userID = auth.currentUser?.uid;
+        if (!userID) return;
+
+        const q = query(collection(db, "boxes"), where("userID", "==", userID));
+        const querySnapshot = await getDocs(q);
+
+        const fetchedBoxes: Box[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          fetchedBoxes.push({
+            id: doc.id,
+            category: data.category,
+            boxName: data.boxName,
+          });
+        });
+
+        setBoxes(fetchedBoxes);
+      } catch (error) {
+        console.error("Error fetching boxes:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBoxes();
+  }, []);
+
+  const categoryEmojis: Record<string, string> = {
+    'Furniture': '🛋️',
+    'Devices': '💻',
+    'Appliances': '🧊',
+    'Papers': '📄',
+    'Perishables': '🍋',
+    'Others': '📦',
+  };
+
+  const getEmojiForCategory = (category: string) => {
+    return categoryEmojis[category] || '📦';
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#BB002D" />
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Hi, John</Text>
-          <Text style={styles.subtitle}>This is the Boxes screen</Text>
-        </View>
-        <View style={styles.headerIcons}>
-          <Feather name="search" size={30} color="#000" style={{ marginRight: 15 }} />
-          <Feather name="list" size={30} color="#000" />
-        </View>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Cards */}
-        <View style={styles.cardRow}>
-          {[1, 2].map((item) => (
-            <View key={item} style={styles.card}>
-              <Image
-                source={{
-                  uri: 'https://cdn-icons-png.flaticon.com/512/6866/6866595.png',
-                }}
-                style={styles.cardImage}
-              />
-              <Text style={styles.cardLabel}>Lemons</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Recent Perishables */}
-        {perishables.map((item, index) => (
-          <TouchableOpacity key={index} style={styles.listItem}>
-            {/* Use the corresponding icon for each item */}
-            <Image source={{ uri: item.icon }} style={styles.itemIcon} />
-            <Text style={styles.listItemText}>{item.name}</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.grid}>
+        {boxes.map((box) => (
+          <TouchableOpacity
+            key={box.id}
+            style={styles.itemBox}
+            onPress={() => router.push({ pathname: "/Boxes/BoxDetails", params: { boxId: box.id } })}
+          >
+            <Text style={styles.emoji}>{getEmojiForCategory(box.category)}</Text>
+            <Text style={styles.itemText}>{box.boxName}</Text>
           </TouchableOpacity>
         ))}
-      </ScrollView>
-      {/* StatusBar */}
-      <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
-    </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingTop: 20,
+    padding: 20,
+    backgroundColor: '#fff',
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    alignItems: "center",
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
-  title: {
-    fontSize: 26,
-    fontWeight: "700",
-    color: "#000",
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#595959",
-    marginTop: 2,
-  },
-  headerIcons: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  cardRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 10,
-    alignItems: "center",
-    width: "49%",
-    shadowColor: "#000",
-    shadowOpacity: 0.15,  
-    shadowRadius: 6,    
-    elevation: 4,     
-  },
-  cardIcon: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 4,
-    zIndex: 1,
-  },
-  cardImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  cardLabel: {
-    fontWeight: "600",
-  },
-  listItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center", 
-    backgroundColor: "#fff",
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    marginBottom: 12,
+  itemBox: {
+    width: '48%',
     borderWidth: 1,
-    borderColor: "#E0E0E0",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    borderColor: '#ccc',
+    borderRadius: 16,
+    paddingVertical: 20,
+    alignItems: 'center',
+    marginBottom: 16,
+    backgroundColor: '#fff',
   },
-  
-  listItemText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#000",
+  emoji: {
+    fontSize: 36,
+    marginBottom: 8,
   },
-  itemIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 12,
-    resizeMode: "contain",
+  itemText: {
+    fontSize: 14,
+    color: '#000',
+    textAlign: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
+

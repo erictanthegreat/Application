@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, Alert, ScrollView } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { collection, addDoc, updateDoc, doc, deleteDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
+import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
 import { db } from "../config/firebaseConfig";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import uuid from "react-native-uuid";
@@ -19,9 +19,31 @@ export default function AddItemScreen() {
   const { boxId } = useLocalSearchParams<{ boxId: string }>();
   const router = useRouter();
 
+  useEffect(() => {
+    if (!boxId) return;
+    const fetchItems = async () => {
+      try {
+        const itemsRef = collection(db, "boxes", boxId, "items");
+        const snapshot = await getDocs(itemsRef);
+
+        const fetchedItems = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          isUploaded: true,
+        }));
+
+        setAddedItems(fetchedItems);
+      } catch (error) {
+        console.error("Error fetching items:", error);
+        Alert.alert("Error", "Failed to load items. Please try again.");
+      }
+    };
+
+    fetchItems();
+  }, [boxId]);
+
   const pickImage = async (fromCamera = false) => {
-    let permissionResult;
-    permissionResult = fromCamera
+    let permissionResult = fromCamera
       ? await ImagePicker.requestCameraPermissionsAsync()
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -39,28 +61,21 @@ export default function AddItemScreen() {
     }
   };
 
-  const checkDuplicateItem = async (title: string) => {
-    const itemsRef = collection(db, "boxes", boxId, "items");
-    const q = query(itemsRef, where("title", "==", title));
-    const querySnapshot = await getDocs(q);
-    return !querySnapshot.empty; 
-  };
-
   const handleUpload = async () => {
     if (!title || !quantity) {
       Alert.alert("Please fill out the Item Name and Quantity.");
       return;
     }
 
-const duplicate = addedItems.find(
-  (item) => item.title.trim().toLowerCase() === title.trim().toLowerCase() &&
-            (!isEditing || item.id !== editingItemId)
-);
+    const duplicate = addedItems.find(
+      (item) => item.title.trim().toLowerCase() === title.trim().toLowerCase() &&
+                (!isEditing || item.id !== editingItemId)
+    );
 
-if (duplicate) {
-  Alert.alert("Duplicate Item", "An item with the same title already exists.");
-  return;
-}
+    if (duplicate) {
+      Alert.alert("Duplicate Item", "An item with the same title already exists.");
+      return;
+    }
 
     let imageURL = "https://via.placeholder.com/200x200.png?text=No+Image";
 
@@ -105,7 +120,6 @@ if (duplicate) {
           Alert.alert("Preview item updated!");
         }
 
-        // Always update UI
         setAddedItems((prev) =>
           prev.map((item) =>
             item.id === editingItemId ? { ...item, title, description, quantity, imageURL } : item
@@ -157,20 +171,17 @@ if (duplicate) {
       "Confirm Deletion",
       "Are you sure you want to delete this item?",
       [
-        {
-          text: "Cancel",
-          style: "cancel", 
-        },
+        { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
-          style: "destructive", 
+          style: "destructive",
           onPress: async () => {
             try {
               const itemDocRef = doc(db, "boxes", boxId, "items", itemId);
               await deleteDoc(itemDocRef);
-  
+
               setAddedItems((prev) => prev.filter((item) => item.id !== itemId));
-  
+
               Alert.alert("Item Deleted", "The item has been deleted.");
             } catch (error) {
               console.error("Error deleting item: ", error);
@@ -182,7 +193,7 @@ if (duplicate) {
       { cancelable: true }
     );
   };
-  
+
   return (
     <ScrollView className="flex-1 bg-white" contentContainerStyle={{ padding: 16, gap: 16 }}>
       <Text className="text-2xl font-bold text-center">Add/Edit Item</Text>
@@ -235,7 +246,7 @@ if (duplicate) {
 
       <View className="mt-4">
         {addedItems.map((item, index) => (
-          <View key={index} className="border p-3 rounded-lg bg-gray-100 mt-2">
+          <View key={item.id || index} className="border p-3 rounded-lg bg-gray-100 mt-2">
             <Image source={{ uri: item.imageURL }} style={{ width: "100%", height: 150, borderRadius: 10 }} />
             <Text className="font-bold mt-2">{item.title}</Text>
             <Text>{item.description}</Text>
@@ -245,10 +256,9 @@ if (duplicate) {
               <Text className="text-white">Edit</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => handleDelete(item.id)} className="bg-red-500 p-2 rounded-lg">
+            <TouchableOpacity onPress={() => handleDelete(item.id)} className="bg-red-500 p-2 rounded-lg mt-2">
               <Text className="text-white">Delete</Text>
             </TouchableOpacity>
-
           </View>
         ))}
       </View>
