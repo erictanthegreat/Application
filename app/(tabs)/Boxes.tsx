@@ -80,7 +80,7 @@ export default function ViewBoxes() {
           <TouchableOpacity
             key={box.id}
             style={styles.itemBox}
-            onPress={() => router.push({ pathname: "/Boxes/BoxDetails", params: { boxId: box.id } })}
+            onPress={() => router.push({ pathname: "./Boxes/BoxDetails", params: { boxId: box.id } })}
           >
             <Text style={styles.emoji}>{getEmojiForCategory(box.category)}</Text>
             <Text style={styles.itemText}>{box.boxName}</Text>
