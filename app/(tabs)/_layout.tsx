@@ -20,21 +20,39 @@ export default function TabLayout() {
 
     const tabOptions = {
         headerRight: () => (
-            <Link href="/modal" asChild>
-                <Pressable>
-                    {({ pressed }) => (
-                        <FontAwesome
-                            name="info-circle"
-                            size={25}
-                            color="#242424" 
-                            style={{
-                                marginRight: 15,
-                                opacity: pressed ? 0.5 : 1,
-                            }}
-                        />
-                    )}
-                </Pressable>
-            </Link>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Link href="/Profile" asChild>
+                    <Pressable>
+                        {({ pressed }) => (
+                            <FontAwesome
+                                name="user"
+                                size={25}
+                                color={pressed ? "#BB002D" : "#BB002D"}
+                                style={{
+                                    marginRight: 15,
+                                    opacity: pressed ? 0.5 : 1,
+                                }}
+                            />
+                        )}
+                    </Pressable>
+                </Link>
+
+                <Link href="/Notifications" asChild>
+                    <Pressable>
+                        {({ pressed }) => (
+                            <FontAwesome
+                                name="bell"
+                                size={25}
+                                color={pressed ? "#BB002D" : "#BB002D"}
+                                style={{
+                                    marginRight: 15,
+                                    opacity: pressed ? 0.5 : 1,
+                                }}
+                            />
+                        )}
+                    </Pressable>
+                </Link>
+            </View>
         ),
         headerStyle: {
             borderBottomWidth: 0,
