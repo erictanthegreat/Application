@@ -1,15 +1,21 @@
+
 {
-    "extends": "expo/tsconfig.base",
-    "compilerOptions": {
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
     "paths": {
       "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"]
     }
   },
-   "include": [
-        "**/*.ts",
-        "**/*.tsx",
-        ".expo/types/**/*.ts",
-        "expo-env.d.ts",
-        "nativewind-env.d.ts"
-, "app/(tabs)/Notifications"    ]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "nativewind-env.d.ts",
+    "app/(tabs)/Notifications"
+  ],
+  "exclude": [
+    "node_modules",
+    "build"
+  ]
 }
