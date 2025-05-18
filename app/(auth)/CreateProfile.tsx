@@ -71,7 +71,7 @@ export default function CreateProfile() {
 
             Alert.alert("Success", "Account created! Please log in.");
             auth.signOut();
-            router.replace("/Login");
+            router.replace("../index.tsx");
 
         } catch (error: any) {
             console.error("Sign Up Error:", error); // 👈 log the error
@@ -151,7 +151,7 @@ export default function CreateProfile() {
                     {loading ? "Creating Account..." : "Sign Up"}
                 </Text>
             </TouchableOpacity>
-            <Link href="/Login">Already have an account? Login here!</Link>
+            <Link href="../index.tsx">Already have an account? Login here!</Link>
         </View>
     );
 }
