@@ -1,4 +1,3 @@
-
 /* Authored by: Eric Tan Jr.
 Company: Nvchads
 Project: InvenTori
@@ -75,20 +74,26 @@ export default function ViewBoxes() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.grid}>
-        {boxes.map((box) => (
-          <TouchableOpacity
-            key={box.id}
-            style={styles.itemBox}
-            onPress={() => router.push({ pathname: "/Boxes/BoxDetails", params: { boxId: box.id } })}
-          >
-            <Text style={styles.emoji}>{getEmojiForCategory(box.category)}</Text>
-            <Text style={styles.itemText}>{box.boxName}</Text>
-        </TouchableOpacity>
-        ))}
-      </View>
+      {boxes.length === 0 ? (
+        <View style={styles.placeholderContainer}>
+          <Text style={styles.placeholderText}>No boxes found! Add boxes to see them here.</Text>
+        </View>
+      ) : (
+        <View style={styles.grid}>
+          {boxes.map((box) => (
+            <TouchableOpacity
+              key={box.id}
+              style={styles.itemBox}
+              onPress={() => router.push({ pathname: "/Boxes/BoxDetails", params: { boxId: box.id } })}
+            >
+              <Text style={styles.emoji}>{getEmojiForCategory(box.category)}</Text>
+              <Text style={styles.itemText}>{box.boxName}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
     </ScrollView>
-  );
+  );  
 }
 
 const styles = StyleSheet.create({
@@ -125,4 +130,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  placeholderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 100,
+  },
+  placeholderText: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
+  },  
 });
