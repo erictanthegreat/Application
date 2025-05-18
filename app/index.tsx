@@ -56,8 +56,12 @@ export default function Login() {
     };
 
     return (
-        <View className="h-screen flex justify-center items-center px-6">
-            <Text className="text-2xl font-bold mb-4">Login</Text>
+        <View className="h-screen flex justify-center items-center px-6 bg-white">
+            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
+                <Text style={{ fontSize: 24, color: "#242424", fontWeight: "700" }}>Login to </Text>
+                <Text style={{ fontSize: 24, color: "#242424", fontWeight: "700" }}>Inven</Text>
+                <Text style={{ fontSize: 24, color: "#BB002D", fontWeight: "700" }}>Tori</Text>
+            </View>
 
             <TextInput
                 placeholder="Email"
@@ -92,13 +96,17 @@ export default function Login() {
             <TouchableOpacity
                 onPress={handleLogin}
                 disabled={loading}
-                className="bg-blue-500 w-full p-3 rounded-lg mt-5"
+                className="bg-[#BB002D] w-full p-3 rounded-lg mt-5"
+                style={{ alignItems: 'center', justifyContent: 'center' }}
             >
-                <Text className="login-message">
+                <Text className="text-white font-bold">
                     {loading ? "Logging in..." : "Login"}
                 </Text>
             </TouchableOpacity>
-            <Link href="/CreateProfile">Don't have an account? Sign up here!</Link>
+
+            <Link href="/CreateProfile" className="text-blue-500 mt-3">
+                Don't have an account? Sign up here!
+            </Link>
         </View>
     );
 }
