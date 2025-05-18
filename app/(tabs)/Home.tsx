@@ -1,12 +1,5 @@
-/* Authored by: Eric Tan Jr.
-Company: Nvchads
-Project: InvenTori
-Feature: [FEATURECODE-001] Home Screen
-Description: Let's the user see the home screen with the dashboard and recent boxes/containers.
- */
-
 import React from "react";
-import { Platform, StyleSheet, Image } from "react-native";
+import { Platform, Image, StyleSheet } from "react-native";
 import { Text, View } from "../../components/Themed";
 import { StatusBar } from "expo-status-bar";
 import Feather from "react-native-vector-icons/Feather";

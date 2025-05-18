@@ -6,7 +6,17 @@ Description: Let's the user see all of their boxes/containers.
 */
 
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, ScrollView, TouchableOpacity, View, Text, ActivityIndicator } from 'react-native';
+import {
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  View,
+  Text,
+  ActivityIndicator,
+  ImageBackground,
+  Pressable,
+} from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db, auth } from '../config/firebaseConfig';
 import { useRouter } from 'expo-router';
@@ -15,6 +25,8 @@ interface Box {
   id: string;
   category: string;
   boxName: string;
+  imageUrl: string;
+  checked?: boolean;
 }
 
 export default function ViewBoxes() {
@@ -38,6 +50,8 @@ export default function ViewBoxes() {
             id: doc.id,
             category: data.category,
             boxName: data.boxName,
+            imageUrl: data.imageUrl,
+            checked: false,
           });
         });
 
@@ -48,8 +62,17 @@ export default function ViewBoxes() {
         setLoading(false);
       }
     };
+
     fetchBoxes();
   }, []);
+
+  const toggleCheckbox = (id: string) => {
+    setBoxes(prev =>
+      prev.map(box =>
+        box.id === id ? { ...box, checked: !box.checked } : box
+      )
+    );
+  };
 
   const categoryEmojis: Record<string, string> = {
     'Furniture': '🛋️',
@@ -74,26 +97,35 @@ export default function ViewBoxes() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {boxes.length === 0 ? (
-        <View style={styles.placeholderContainer}>
-          <Text style={styles.placeholderText}>No boxes found! Add boxes to see them here.</Text>
-        </View>
-      ) : (
-        <View style={styles.grid}>
-          {boxes.map((box) => (
+      <View style={styles.grid}>
+        {boxes.map((box) => (
+          <View key={box.id} style={styles.itemBox}>
             <TouchableOpacity
-              key={box.id}
-              style={styles.itemBox}
               onPress={() => router.push({ pathname: "/Boxes/BoxDetails", params: { boxId: box.id } })}
             >
-              <Text style={styles.emoji}>{getEmojiForCategory(box.category)}</Text>
-              <Text style={styles.itemText}>{box.boxName}</Text>
+              <ImageBackground
+                source={{ uri: box.imageUrl }}
+                style={styles.imageContainer}
+                imageStyle={styles.image}
+              >
+                <View style={styles.emojiBadge}>
+                  <Text style={styles.emoji}>{getEmojiForCategory(box.category)}</Text>
+                </View>
+                <Pressable style={styles.checkbox} onPress={() => toggleCheckbox(box.id)}>
+                  <MaterialIcons
+                    name={box.checked ? "check-box" : "check-box-outline-blank"}
+                    size={22}
+                    color="#000"
+                  />
+                </Pressable>
+              </ImageBackground>
             </TouchableOpacity>
-          ))}
-        </View>
-      )}
+            <Text style={styles.itemText}>{box.boxName}</Text>
+          </View>
+        ))}
+      </View>
     </ScrollView>
-  );  
+  );
 }
 
 const styles = StyleSheet.create({
@@ -108,37 +140,48 @@ const styles = StyleSheet.create({
   },
   itemBox: {
     width: '48%',
-    borderWidth: 1,
-    borderColor: '#ccc',
     borderRadius: 16,
-    paddingVertical: 20,
-    alignItems: 'center',
     marginBottom: 16,
     backgroundColor: '#fff',
+    overflow: 'hidden',
+  },
+  imageContainer: {
+    width: '100%',
+    aspectRatio: 1.2,
+    justifyContent: 'space-between',
+    padding: 8,
+  },
+  image: {
+    borderRadius: 12,
+  },
+  emojiBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 12,
   },
   emoji: {
-    fontSize: 36,
-    marginBottom: 8,
+    fontSize: 20,
+  },
+  checkbox: {
+    alignSelf: 'flex-end',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 12,
+    padding: 2,
   },
   itemText: {
     fontSize: 14,
     color: '#000',
     textAlign: 'center',
+    marginTop: 6,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  placeholderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 100,
-  },
-  placeholderText: {
-    fontSize: 16,
-    color: '#999',
-    textAlign: 'center',
-  },  
 });
+
+
+

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Platform } from "react-native";
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert, ScrollView } from 'react-native';
+import { Platform, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, View, Text } from 'react-native';
 import { StatusBar } from "expo-status-bar";
 import { db, auth } from "../config/firebaseConfig";
 import { useRouter } from "expo-router";
@@ -26,12 +25,12 @@ export default function CreateBox() {
       Alert.alert("Error creating box", "Please select a category");
       return;
     }
-  
+
     if (!BoxName.trim()) {
       Alert.alert("Error creating box", "Please enter a box name.");
       return;
     }
-  
+
     try {
       // Check if the box name already exists
       const boxQuery = query(
@@ -39,13 +38,13 @@ export default function CreateBox() {
         where("boxName", "==", BoxName)
       );
       const querySnapshot = await getDocs(boxQuery);
-  
+
       if (!querySnapshot.empty) {
         // Box with the same name already exists
         Alert.alert("Error creating box", "A box with this name already exists. Please choose a different name.");
         return;
       }
-  
+
       const boxRef = await addDoc(collection(db, "boxes"), {
         category: selectedItem,
         createdAt: serverTimestamp(),
@@ -53,24 +52,29 @@ export default function CreateBox() {
         boxName: BoxName.trim(),
         description: boxDescription.trim() || null, 
       });
-      
+
       router.push({
         pathname: "/Boxes/AddItems",
         params: { boxId: boxRef.id },
       });
-  
+
     } catch (error: any) {
       console.error("Error creating box:", error);
       Alert.alert("Error", "Something went wrong. Try again.");
     }
   };
-  
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ padding: 16, gap: 16 }}>
-      <Text style={styles.title}>Choose</Text>
-      <Text style={styles.subtitle}>an item type</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.title}>Create a Box</Text>
+          <Text style={styles.subtitle}>Choose a category and name your box</Text>
+        </View>
+      </View>
 
+      {/* Category Grid */}
       <View style={styles.grid}>
         {items.map((item) => {
           const isSelected = selectedItem === item.name;
@@ -88,29 +92,31 @@ export default function CreateBox() {
         })}
       </View>
 
+      {/* Box Name Input */}
       <TextInput
         placeholder="Box Name"
         value={BoxName}
         onChangeText={(text) => setBoxName(text)}
-        className="border border-gray-300 w-full p-3 rounded-lg"
+        style={styles.input}
       />
 
+      {/* Box Description Input */}
       <TextInput
         placeholder="Box Description (optional)"
         value={boxDescription}
         onChangeText={(text) => setBoxDescription(text)}
-        className="border border-gray-300 w-full p-3 rounded-lg"
+        style={styles.input}
       />
 
-      
+      {/* Confirm Button */}
       <TouchableOpacity
-        className="mt-10 bg-blue-600 px-6 py-3 rounded-full"
+        style={styles.confirmButton}
         onPress={handleConfirm}
       >
-        <Text className="text-white font-semibold text-base">Confirm Category</Text>
+        <Text style={styles.confirmButtonText}>Confirm Category</Text>
       </TouchableOpacity>
-      
-      {/* Use a light status bar on iOS to account for the black space above the modal */}
+
+      {/* StatusBar */}
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
     </ScrollView>
   );
@@ -118,25 +124,24 @@ export default function CreateBox() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 60,
-    paddingHorizontal: 20,
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: "center"
+    backgroundColor: "#fff",
+    paddingTop: 20,
+    paddingHorizontal: 20,
   },
-  logo: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  header: {
     marginBottom: 20,
   },
   title: {
     fontSize: 26,
-    fontWeight: 'bold',
+    fontWeight: "700", 
+    color: "#000",
   },
   subtitle: {
-    fontSize: 16,
-    color: 'gray',
-    marginBottom: 20,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#595959", 
+    marginTop: 2,
   },
   grid: {
     flexDirection: 'row',
@@ -176,7 +181,25 @@ const styles = StyleSheet.create({
     color: '#f12d6c',
     fontWeight: 'bold',
   },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 16,
+    fontSize: 16,
+    color: '#000',
+  },
   confirmButton: {
-    
-  }
+    backgroundColor: '#BB002D',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  confirmButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
