@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Link, useRouter } from "expo-router";
-import { auth } from "../config/firebaseConfig";
+import { auth } from "./config/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function Login() {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, Alert, ScrollView } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -56,13 +55,13 @@ export default function AddItemScreen() {
 
     const result = fromCamera
       ? await ImagePicker.launchCameraAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          mediaTypes: ['images'],
           allowsEditing: true,
           aspect: [1, 1],
           quality: 1,
         })
       : await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          mediaTypes: ['images'],
           allowsEditing: true,
           aspect: [1, 1],
           quality: 1,
@@ -130,7 +129,7 @@ export default function AddItemScreen() {
 
           Alert.alert("Item Updated!");
         } else {
-          Alert.alert("Preview item updated!");
+          Alert.alert("Error updating item! Please try again!");
         }
 
         // Always update UI
