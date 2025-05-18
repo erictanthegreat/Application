@@ -20,21 +20,39 @@ export default function TabLayout() {
 
     const tabOptions = {
         headerRight: () => (
-            <Link href="/modal" asChild>
-                <Pressable>
-                    {({ pressed }) => (
-                        <FontAwesome
-                            name="info-circle"
-                            size={25}
-                            color="#242424" 
-                            style={{
-                                marginRight: 15,
-                                opacity: pressed ? 0.5 : 1,
-                            }}
-                        />
-                    )}
-                </Pressable>
-            </Link>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Link href="/Profile" asChild>
+                    <Pressable>
+                        {({ pressed }) => (
+                            <FontAwesome
+                                name="user"
+                                size={25}
+                                color={pressed ? "#BB002D" : "#BB002D"}
+                                style={{
+                                    marginRight: 15,
+                                    opacity: pressed ? 0.5 : 1,
+                                }}
+                            />
+                        )}
+                    </Pressable>
+                </Link>
+
+                <Link href="/Notifications" asChild>
+                    <Pressable>
+                        {({ pressed }) => (
+                            <FontAwesome
+                                name="bell"
+                                size={25}
+                                color={pressed ? "#BB002D" : "#BB002D"}
+                                style={{
+                                    marginRight: 15,
+                                    opacity: pressed ? 0.5 : 1,
+                                }}
+                            />
+                        )}
+                    </Pressable>
+                </Link>
+            </View>
         ),
         headerStyle: {
             borderBottomWidth: 0,
@@ -48,6 +66,7 @@ export default function TabLayout() {
                 headerShown: useClientOnlyValue(false, true),
             }}
         >
+            {/* Home Screen */}
             <Tabs.Screen
                 name="Home"
                 options={{
@@ -63,7 +82,6 @@ export default function TabLayout() {
                                 source={require('../../assets/images/Logo.svg')}
                                 style={{ width: 30, height: 30, marginRight: 8 }}
                             />
-
                             <Text style={{ fontSize: 20, color: "#242424", fontWeight: "600" }}>Inven</Text>
                             <Text style={{ fontSize: 20, color: "#BB002D", fontWeight: "600" }}>Tori</Text>
                         </View>
@@ -72,6 +90,7 @@ export default function TabLayout() {
                 }}
             />
 
+            {/* Boxes Screen */}
             <Tabs.Screen
                 name="Boxes"
                 options={{
@@ -87,7 +106,6 @@ export default function TabLayout() {
                                 source={require('../../assets/images/Logo.svg')}
                                 style={{ width: 30, height: 30, marginRight: 8 }}
                             />
-
                             <Text style={{ fontSize: 20, color: "#242424", fontWeight: "600" }}>Inven</Text>
                             <Text style={{ fontSize: 20, color: "#BB002D", fontWeight: "600" }}>Tori</Text>
                         </View>
@@ -96,6 +114,7 @@ export default function TabLayout() {
                 }}
             />
 
+            {/* Create Screen */}
             <Tabs.Screen
                 name="Create"
                 options={{
@@ -120,7 +139,6 @@ export default function TabLayout() {
                                 source={require('../../assets/images/Logo.svg')}
                                 style={{ width: 30, height: 30, marginRight: 8 }}
                             />
-
                             <Text style={{ fontSize: 20, color: "#242424", fontWeight: "600" }}>Inven</Text>
                             <Text style={{ fontSize: 20, color: "#BB002D", fontWeight: "600" }}>Tori</Text>
                         </View>
@@ -131,6 +149,7 @@ export default function TabLayout() {
                 }}
             />
 
+            {/* Notifications Screen */}
             <Tabs.Screen
                 name="Notifications"
                 options={{
@@ -146,7 +165,6 @@ export default function TabLayout() {
                                 source={require('../../assets/images/Logo.svg')}
                                 style={{ width: 30, height: 30, marginRight: 8 }}
                             />
-
                             <Text style={{ fontSize: 20, color: "#242424", fontWeight: "600" }}>Inven</Text>
                             <Text style={{ fontSize: 20, color: "#BB002D", fontWeight: "600" }}>Tori</Text>
                         </View>
@@ -155,6 +173,7 @@ export default function TabLayout() {
                 }}
             />
 
+            {/* Profile Screen */}
             <Tabs.Screen
                 name="Profile"
                 options={{
@@ -170,7 +189,6 @@ export default function TabLayout() {
                                 source={require('../../assets/images/Logo.svg')}
                                 style={{ width: 30, height: 30, marginRight: 8 }}
                             />
-
                             <Text style={{ fontSize: 20, color: "#242424", fontWeight: "600" }}>Inven</Text>
                             <Text style={{ fontSize: 20, color: "#BB002D", fontWeight: "600" }}>Tori</Text>
                         </View>
