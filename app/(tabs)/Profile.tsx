@@ -20,7 +20,7 @@ const router = useRouter();
 const handleLogout = async() => {
   try {
     await signOut(auth);
-    router.replace("../index.tsx");
+    router.push("/");
   } catch (error) {
     console.error("Error Logging Out: ", error);
   }

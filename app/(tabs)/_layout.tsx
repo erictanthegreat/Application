@@ -90,30 +90,6 @@ export default function TabLayout() {
                 }}
             />
 
-            {/* Boxes Screen */}
-            <Tabs.Screen
-                name="Boxes"
-                options={{
-                    tabBarIcon: ({ color, size }) => (
-                        <View style={{ flexDirection: "column", alignItems: "center" }}>
-                            <Feather name="package" size={size} color={color} />
-                        </View>
-                    ),
-                    tabBarLabel: "Boxes",
-                    headerTitle: () => (
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                            <Image
-                                source={require('../../assets/images/Logo.svg')}
-                                style={{ width: 30, height: 30, marginRight: 8 }}
-                            />
-                            <Text style={{ fontSize: 20, color: "#242424", fontWeight: "600" }}>Inven</Text>
-                            <Text style={{ fontSize: 20, color: "#BB002D", fontWeight: "600" }}>Tori</Text>
-                        </View>
-                    ),
-                    ...tabOptions,
-                }}
-            />
-
             {/* Create Screen */}
             <Tabs.Screen
                 name="Create"
@@ -149,16 +125,16 @@ export default function TabLayout() {
                 }}
             />
 
-            {/* Notifications Screen */}
+            {/* Boxes Screen */}
             <Tabs.Screen
-                name="Notifications"
+                name="Boxes"
                 options={{
                     tabBarIcon: ({ color, size }) => (
                         <View style={{ flexDirection: "column", alignItems: "center" }}>
-                            <Feather name="bell" size={size} color={color} />
+                            <Feather name="package" size={size} color={color} />
                         </View>
                     ),
-                    tabBarLabel: "Notifications",
+                    tabBarLabel: "Boxes",
                     headerTitle: () => (
                         <View style={{ flexDirection: "row", alignItems: "center" }}>
                             <Image
