@@ -2,8 +2,8 @@
 Company: Nvchads
 Project: InvenTori
 Feature: [FEATURECODE-003] Profile Screen
-Description: Let's the user to check their profile and settings.
- */
+Description: Let the user check their profile and settings.
+*/
 
 import React from "react";
 import { SafeAreaView, Text, StyleSheet, TouchableOpacity } from "react-native";
@@ -15,24 +15,24 @@ import { auth } from "../config/firebaseConfig";
 
 export default function Profile() {
 
-const router = useRouter();
+  const router = useRouter();
 
-const handleLogout = async() => {
-  try {
-    await signOut(auth);
-    router.push("/");
-  } catch (error) {
-    console.error("Error Logging Out: ", error);
-  }
-};
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/");
+    } catch (error) {
+      console.error("Error Logging Out: ", error);
+    }
+  };
 
   return (
     <SafeAreaView>
       <View className="h-screen flex p-5 items-center gap-[10px]">
-        
+
         <Image
           source={require('../../assets/images/Profile_icon.png')}
-          style={styles.image}  // Use styles for image
+          style={styles.image}
         />
 
         <View style={styles.textContainer}>
@@ -51,20 +51,19 @@ const handleLogout = async() => {
           </View>
 
           <View style={styles.separator} />
-          
-          {['Push Notifications', 'Language & Region', 'Support', 'About', 'Logout'].map((label, index) => (
-            
+
+          {['Language & Region', 'Support', 'About', 'Logout'].map((label, index) => (
             <View key={index}>
-              {label == 'Logout' ? (
-              <TouchableOpacity onPress={handleLogout} style={styles.settingButton}>
-                <Text style={styles.settingButtonText}>{label}</Text>
-              </TouchableOpacity>
-            ) : (
-              <Link href="/+not-found" style={styles.settingButton}>
-                <Text style={styles.settingButtonText}>{label}</Text>
-              </Link>
-            )}
-              {index < 4 && <View style={styles.separator} />}
+              {label === 'Logout' ? (
+                <TouchableOpacity onPress={handleLogout} style={styles.settingButton}>
+                  <Text style={[styles.settingButtonText, { color: 'red' }]}>{label}</Text>
+                </TouchableOpacity>
+              ) : (
+                <Link href="/+not-found" style={styles.settingButton}>
+                  <Text style={styles.settingButtonText}>{label}</Text>
+                </Link>
+              )}
+              {index < 3 && <View style={styles.separator} />}
             </View>
           ))}
 
@@ -133,7 +132,7 @@ const styles = StyleSheet.create({
 
   headerText: {
     fontSize: 20,
-    fontWeight: 700,
+    fontWeight: '700',
     color: '#242424',
   },
 
