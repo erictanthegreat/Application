@@ -21,7 +21,7 @@ export default function TabLayout() {
     const tabOptions = {
         headerRight: () => (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Link href="/Profile" asChild>
+                <Link href="/tabs/Profile" asChild>
                     <Pressable>
                         {({ pressed }) => (
                             <FontAwesome
@@ -37,7 +37,7 @@ export default function TabLayout() {
                     </Pressable>
                 </Link>
 
-                <Link href="/Notifications" asChild>
+                <Link href="/tabs/Notifications" asChild>
                     <Pressable>
                         {({ pressed }) => (
                             <FontAwesome

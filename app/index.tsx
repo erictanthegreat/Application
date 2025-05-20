@@ -3,10 +3,12 @@ import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { auth } from "./config/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import Feather from "react-native-vector-icons/Feather";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPwd, setShowPwd] = useState(false);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
     const router = useRouter();
@@ -72,23 +74,60 @@ export default function Login() {
                 }}
                 keyboardType="email-address"
                 autoCapitalize="none"
-                className="border border-gray-300 w-full p-3 rounded-lg"
+                style={{
+                    backgroundColor: '#F9F9F9',
+                    borderColor: '#E0E0E0',
+                    borderWidth: 1,
+                    width: '100%',
+                    paddingHorizontal: 12,
+                    paddingVertical: 14,
+                    fontSize: 16,
+                    color: "#000",
+                    borderRadius: 8,
+                    marginBottom: 16,
+                }}
+                placeholderTextColor="#999"
             />
             {errors.email && <Text className="text-red-500 text-sm mt-1">{errors.email}</Text>}
 
-            <TextInput
-                placeholder="Password"
-                value={password}
-                onChangeText={(text) => {
-                    setPassword(text);
-                    setErrors((prev) => ({ ...prev, password: undefined }));
-                }}
-                secureTextEntry
-                returnKeyType="go"
-                onSubmitEditing={handleLogin}
-                className="border border-gray-300 w-full p-3 rounded-lg mt-3"
-            />
-
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: '#F9F9F9',
+                borderWidth: 1,
+                borderColor: '#E0E0E0',
+                borderRadius: 8,
+                marginBottom: 0,
+                width: '100%'
+            }}>
+                <TextInput
+                    style={{
+                        flex: 1,
+                        paddingHorizontal: 12,
+                        paddingVertical: 14,
+                        fontSize: 16,
+                        color: "#000",
+                        borderRadius: 8,
+                        backgroundColor: '#F9F9F9',
+                    }}
+                    placeholder="Enter password"
+                    placeholderTextColor="#999"
+                    secureTextEntry={!showPwd}
+                    value={password}
+                    onChangeText={setPassword}
+                />
+                <TouchableOpacity
+                    onPress={() => setShowPwd((v) => !v)}
+                    style={{
+                        paddingHorizontal: 12,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        height: '100%',
+                    }}
+                >
+                    <Feather name={showPwd ? "eye" : "eye-off"} size={20} color="#666" />
+                </TouchableOpacity>
+            </View>
             {errors.password && <Text className="text-red-500 text-sm mt-1">{errors.password}</Text>}
 
             {errors.general && <Text className="text-red-500 text-sm mt-2">{errors.general}</Text>}
@@ -104,9 +143,12 @@ export default function Login() {
                 </Text>
             </TouchableOpacity>
 
-            <Link href="/CreateProfile" className="text-blue-500 mt-3">
-                Don't have an account? Sign up here!
-            </Link>
+            <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 16 }}>
+                <Text style={{ fontSize: 14, color: "#000" }}>Don’t have an account? </Text>
+                <Link href="/CreateProfile" className="text-[#BB002D] font-bold">
+                    Sign up here!
+                </Link>
+            </View>
         </View>
     );
 }

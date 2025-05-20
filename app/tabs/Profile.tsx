@@ -1,10 +1,3 @@
-/* Authored by: Eric Tan Jr.
-Company: Nvchads
-Project: InvenTori
-Feature: [FEATURECODE-003] Profile Screen
-Description: Let the user check their profile and settings.
-*/
-
 import React from "react";
 import { SafeAreaView, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { View } from "../../components/Themed";
@@ -20,38 +13,42 @@ export default function Profile() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      router.push("/");
+      router.push("/"); // Redirect to home after logout
     } catch (error) {
       console.error("Error Logging Out: ", error);
     }
   };
 
   return (
-    <SafeAreaView>
-      <View className="h-screen flex p-5 items-center gap-[10px]">
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={styles.container}>
 
+        {/* Profile Image */}
         <Image
           source={require('../../assets/images/Profile_icon.png')}
           style={styles.image}
         />
 
+        {/* Name and Email */}
         <View style={styles.textContainer}>
           <Text style={styles.nameText}>John Doe</Text>
           <Text style={styles.emailText}>johndoe@gmail.com</Text>
         </View>
 
+        {/* Edit Profile Button */}
         <Link href="/Profile/EditProfile" style={styles.editButton}>
           <Text style={styles.buttonText}>Edit Profile</Text>
         </Link>
 
+        {/* Preferences Section */}
         <View style={styles.buttonContainer}>
-
           <View style={styles.headerContainer}>
             <Text style={styles.headerText}>Preferences</Text>
           </View>
 
           <View style={styles.separator} />
 
+          {/* Settings buttons */}
           {['Language & Region', 'Support', 'About', 'Logout'].map((label, index) => (
             <View key={index}>
               {label === 'Logout' ? (
@@ -66,7 +63,6 @@ export default function Profile() {
               {index < 3 && <View style={styles.separator} />}
             </View>
           ))}
-
         </View>
 
       </View>
@@ -75,6 +71,13 @@ export default function Profile() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center', // Vertically center
+    alignItems: 'center', // Horizontally center
+    padding: 20,
+  },
+
   image: {
     height: 100,
     width: 100,

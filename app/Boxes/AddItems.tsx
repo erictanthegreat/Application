@@ -245,13 +245,13 @@ export default function AddItemScreen() {
         className="border border-gray-300 p-3 rounded-lg"
       />
 
-      <TouchableOpacity onPress={handleUpload} disabled={uploading} className="bg-blue-500 p-4 rounded-lg mt-2">
+      <TouchableOpacity onPress={handleUpload} disabled={uploading} className="bg-[#3B82F6] p-4 rounded-lg mt-2">
         <Text className="text-white text-center font-semibold">
           {uploading ? "Uploading..." : isEditing ? "Update Item" : "Add Item"}
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push("../(tabs)/Home")} className="bg-green-600 p-4 rounded-lg mt-4">
+      <TouchableOpacity onPress={() => router.push("../(tabs)/Home")} className="bg-[#BB002D] p-4 rounded-lg mt-4">
         <Text className="text-white text-center font-semibold">Confirm Items</Text>
       </TouchableOpacity>
 
