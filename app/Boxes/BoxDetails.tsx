@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { db } from "../config/firebaseConfig";
 import { doc, getDoc, deleteDoc, collection, getDocs } from "firebase/firestore";
 import { Feather } from "@expo/vector-icons";
+import QRCode from 'react-native-qrcode-svg';
+
 
 export default function BoxDetails() {
   const params = useLocalSearchParams();
@@ -140,6 +142,7 @@ export default function BoxDetails() {
           <Text style={styles.noItemsText}>No items in this box yet.</Text>
         )}
       </View>
+      
     </ScrollView>
   );
 }

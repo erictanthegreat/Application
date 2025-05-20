@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { auth, db } from "../config/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -92,6 +92,16 @@ export default function CreateProfile() {
 
   return (
     <View style={styles.container}>
+      {/* Logo */}
+                  <Image
+                      source={require("../../assets/images/Logo_1.png")}
+                      style={{
+                          width: 150,
+                          height: 150,
+                          resizeMode: "contain",
+                          marginBottom: 24,
+                      }}
+                  />
       <Text style={styles.header}>Create Profile</Text>
 
       <TextInput

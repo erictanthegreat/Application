@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { auth } from "./config/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -59,6 +59,17 @@ export default function Login() {
 
     return (
         <View className="h-screen flex justify-center items-center px-6 bg-white">
+            {/* Logo */}
+            <Image
+                source={require("../assets/images/Logo_1.png")}
+                style={{
+                    width: 150,
+                    height: 150,
+                    resizeMode: "contain",
+                    marginBottom: 24,
+                }}
+            />
+
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>
                 <Text style={{ fontSize: 24, color: "#242424", fontWeight: "700" }}>Login to </Text>
                 <Text style={{ fontSize: 24, color: "#242424", fontWeight: "700" }}>Inven</Text>

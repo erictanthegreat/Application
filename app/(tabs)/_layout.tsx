@@ -24,7 +24,7 @@ export default function TabLayout() {
                     <Pressable>
                         {({ pressed }) => (
                             <FontAwesome
-                                name="user"
+                                name="cog"
                                 size={25}
                                 color={pressed ? "#BB002D" : "#BB002D"}
                                 style={{
@@ -62,7 +62,7 @@ export default function TabLayout() {
                     headerTitle: () => (
                         <View style={{ flexDirection: "row", alignItems: "center" }}>
                             <Image
-                                source={require('../../assets/images/Logo.svg')}
+                                source={require('../../assets/images/Logo_1.png')}
                                 style={{ width: 30, height: 30, marginRight: 8 }}
                             />
                             <Text style={{ fontSize: 20, color: "#242424", fontWeight: "600" }}>Inven</Text>
@@ -95,7 +95,7 @@ export default function TabLayout() {
                     headerTitle: () => (
                         <View style={{ flexDirection: "row", alignItems: "center" }}>
                             <Image
-                                source={require('../../assets/images/Logo.svg')}
+                                source={require('../../assets/images/Logo_1.png')}
                                 style={{ width: 30, height: 30, marginRight: 8 }}
                             />
                             <Text style={{ fontSize: 20, color: "#242424", fontWeight: "600" }}>Inven</Text>
@@ -121,7 +121,7 @@ export default function TabLayout() {
                     headerTitle: () => (
                         <View style={{ flexDirection: "row", alignItems: "center" }}>
                             <Image
-                                source={require('../../assets/images/Logo.svg')}
+                                source={require('../../assets/images/Logo_1.png')}
                                 style={{ width: 30, height: 30, marginRight: 8 }}
                             />
                             <Text style={{ fontSize: 20, color: "#242424", fontWeight: "600" }}>Inven</Text>

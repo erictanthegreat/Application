@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Platform, StyleSheet } from "react-native";
 import { Text, View } from "../../components/Themed";
@@ -11,6 +12,8 @@ import {
   where,
   orderBy,
   limit,
+  doc,
+  getDoc,
 } from "firebase/firestore";
 
 // Category emoji mapping
@@ -27,8 +30,28 @@ export default function Home() {
   const [boxCount, setBoxCount] = useState(0);
   const [mostUsedCategory, setMostUsedCategory] = useState<string | null>(null);
   const [recentBoxes, setRecentBoxes] = useState<any[]>([]);
+  const [userName, setUserName] = useState<string>("");
 
   useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const userID = auth.currentUser?.uid;
+        if (!userID) return;
+        // Fetch user document from 'users' collection
+        const userDocRef = doc(db, "users", userID);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          setUserName(userData.fullName || "User");
+        } else {
+          setUserName("User");
+        }
+      } catch (error) {
+        console.error("Error fetching user name:", error);
+        setUserName("User");
+      }
+    };
+
     const fetchStats = async () => {
       try {
         const userID = auth.currentUser?.uid;
@@ -87,6 +110,7 @@ export default function Home() {
       }
     };
 
+    fetchUserName();
     fetchStats();
     fetchRecentBoxes();
   }, []);
@@ -100,7 +124,7 @@ export default function Home() {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Hi, John</Text>
+          <Text style={styles.title}>Hi, {userName}</Text>
           <Text style={styles.subtitle}>This is the home screen</Text>
         </View>
         <View style={styles.headerIcons}>
