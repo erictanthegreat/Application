@@ -74,7 +74,7 @@ export default function CreateProfile() {
 
       Alert.alert("Success", "Account created! Please log in.");
       auth.signOut();
-      router.replace("../index.tsx");
+      router.replace("../");
     } catch (error: any) {
       console.error("Sign Up Error:", error);
 
