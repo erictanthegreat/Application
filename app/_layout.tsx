@@ -68,9 +68,9 @@ function RootLayoutNav() {
                     options={{ headerShown: false }}
                 />
 
-                <Stack.Screen name="tabs/Profile" options={{ headerTitle: "Profile", }} />
-                <Stack.Screen name="tabs/Notifications" options={{ headerTitle: "Notifications", }} />
+                <Stack.Screen name="NavTabs/Profile" options={{ headerTitle: "Profile", }} />
                 <Stack.Screen name="Boxes/AddItems" options={{ headerTitle: "Your Items", }} />
+                <Stack.Screen name="Boxes/BoxDetails" options={{ headerTitle: "Box Details"}} />
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="Profile/EditProfile" options={{ headerTitle: "Edit Profile", }} />
                 <Stack.Screen

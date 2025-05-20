@@ -3,7 +3,6 @@ import { Pressable, View, Text, Image } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Link, Tabs } from "expo-router";
 import Feather from "react-native-vector-icons/Feather";
-
 import { useColorScheme } from "../../components/useColorScheme";
 import { useClientOnlyValue } from "../../components/useClientOnlyValue";
 
@@ -21,27 +20,11 @@ export default function TabLayout() {
     const tabOptions = {
         headerRight: () => (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Link href="/tabs/Profile" asChild>
+                <Link href="/NavTabs/Profile" asChild>
                     <Pressable>
                         {({ pressed }) => (
                             <FontAwesome
                                 name="user"
-                                size={25}
-                                color={pressed ? "#BB002D" : "#BB002D"}
-                                style={{
-                                    marginRight: 15,
-                                    opacity: pressed ? 0.5 : 1,
-                                }}
-                            />
-                        )}
-                    </Pressable>
-                </Link>
-
-                <Link href="/tabs/Notifications" asChild>
-                    <Pressable>
-                        {({ pressed }) => (
-                            <FontAwesome
-                                name="bell"
                                 size={25}
                                 color={pressed ? "#BB002D" : "#BB002D"}
                                 style={{
@@ -135,30 +118,6 @@ export default function TabLayout() {
                         </View>
                     ),
                     tabBarLabel: "Boxes",
-                    headerTitle: () => (
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                            <Image
-                                source={require('../../assets/images/Logo.svg')}
-                                style={{ width: 30, height: 30, marginRight: 8 }}
-                            />
-                            <Text style={{ fontSize: 20, color: "#242424", fontWeight: "600" }}>Inven</Text>
-                            <Text style={{ fontSize: 20, color: "#BB002D", fontWeight: "600" }}>Tori</Text>
-                        </View>
-                    ),
-                    ...tabOptions,
-                }}
-            />
-
-            {/* Profile Screen */}
-            <Tabs.Screen
-                name="Profile"
-                options={{
-                    tabBarIcon: ({ color, size }) => (
-                        <View style={{ flexDirection: "column", alignItems: "center" }}>
-                            <Feather name="user" size={size} color={color} />
-                        </View>
-                    ),
-                    tabBarLabel: "Profile",
                     headerTitle: () => (
                         <View style={{ flexDirection: "row", alignItems: "center" }}>
                             <Image
