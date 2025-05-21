@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, Modal } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, Modal, Platform } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState, useRef } from "react";
 import { db } from "../config/firebaseConfig";
@@ -309,18 +309,27 @@ export default function BoxDetails() {
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-end" }}>
-            <Text style={{ fontSize: 12, color: "#888", marginRight: 12, maxWidth: 180, textAlign: "right" }}>
-              Long press an item to select it!
-            </Text>
-            <TouchableOpacity
-              style={styles.exportQrButton}
-              onPress={() => setQrModalVisible(true)}
-            >
-              <Feather name="download" size={18} color="#fff" />
-              <Text style={styles.exportQrButtonText}>Export QR</Text>
-            </TouchableOpacity>
-          </View>
+          <>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-end" }}>
+              <Text style={{ fontSize: 12, color: "#888", marginRight: 12, maxWidth: 180, textAlign: "right" }}>
+                Long press an item to select it!
+              </Text>
+              <TouchableOpacity
+                style={styles.exportQrButton}
+                onPress={() => setQrModalVisible(true)}
+              >
+                <Feather name="download" size={18} color="#fff" />
+                <Text style={styles.exportQrButtonText}>
+                  Export QR
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {Platform.OS === "ios" && (
+              <Text style={{ color: "#FF3B30", fontSize: 12, textAlign: "right", marginTop: 4 }}>
+                Export QR only works for Android devices for now.
+              </Text>
+            )}
+          </>
         )}
       </View>
 
