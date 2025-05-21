@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -26,6 +27,13 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import uuid from "react-native-uuid";
 
 const placeholderImage = require("../../assets/images/placeholder.png");
+
+// --- Helper to update lastModifiedAt on the parent box ---
+async function updateBoxLastModifiedAt(boxId: string) {
+  if (!boxId) return;
+  const boxRef = doc(db, "boxes", boxId);
+  await updateDoc(boxRef, { lastModifiedAt: serverTimestamp() });
+}
 
 export default function AddItemScreen() {
   const [image, setImage] = useState<string | null>(null);
@@ -139,6 +147,9 @@ export default function AddItemScreen() {
         { id: newDocRef.id, title, description, quantity, imageURL, isUploaded: true },
       ]);
 
+      // --- Update lastModifiedAt on the box ---
+      await updateBoxLastModifiedAt(boxId);
+
       Alert.alert("Item Added!");
       setImage(null);
       setTitle("");
@@ -218,6 +229,9 @@ export default function AddItemScreen() {
         )
       );
 
+      // --- Update lastModifiedAt on the box ---
+      await updateBoxLastModifiedAt(boxId);
+
       setModalVisible(false);
       setEditingItemId(null);
       Alert.alert("Item Updated!");
@@ -240,15 +254,21 @@ export default function AddItemScreen() {
             const itemDocRef = doc(db, "boxes", boxId, "items", itemId);
             await deleteDoc(itemDocRef);
             setAddedItems((prev) => prev.filter((item) => item.id !== itemId));
-            Alert.alert("Item Deleted");
+
+            // --- Update lastModifiedAt on the box ---
+            await updateBoxLastModifiedAt(boxId);
+
+            Alert.alert("Item Deleted", "The item has been deleted.");
           } catch (error) {
             console.error("Error deleting item: ", error);
-            Alert.alert("Error", "Failed to delete item.");
+            Alert.alert("Error", "Failed to delete the item. Please try again.");
           }
         },
       },
-    ]);
-  };
+    ],
+    { cancelable: true }
+  );
+};
 
   return (
     <ScrollView className="flex-1 bg-white" contentContainerStyle={{ padding: 16, gap: 16 }}>
@@ -298,7 +318,6 @@ export default function AddItemScreen() {
       <View className="mt-4">
         {addedItems.map((item) => (
           <View key={item.id} className="border p-3 rounded-lg bg-gray-100 mt-2">
-            {/* 🔧 CHANGES MADE HERE: Local fallback for imageURL */}
             <Image
               source={item.imageURL ? { uri: item.imageURL } : placeholderImage}
               style={{ width: "100%", height: 150, borderRadius: 10 }}
@@ -318,6 +337,74 @@ export default function AddItemScreen() {
       </View>
 
       {/* Modal logic unchanged for brevity */}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={modalStyles.overlay}>
+          <View style={modalStyles.modalContent}>
+            <Text style={modalStyles.modalTitle}>Edit Item</Text>
+            <Image
+              source={editImage ? { uri: editImage } : placeholderImage}
+              style={{ width: "100%", height: 150, borderRadius: 10, marginBottom: 10 }}
+            />
+            <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 10 }}>
+              <TouchableOpacity
+                onPress={() => pickImage(false, true)}
+                style={[modalStyles.modalButton, { flex: 1, marginRight: 5 }]}
+              >
+                <Text>Gallery</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => pickImage(true, true)}
+                style={[modalStyles.modalButton, { flex: 1, marginLeft: 5 }]}
+              >
+                <Text>Camera</Text>
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              placeholder="Item Title"
+              value={editTitle}
+              onChangeText={setEditTitle}
+              style={modalStyles.input}
+            />
+            <TextInput
+              placeholder="Description"
+              value={editDescription}
+              onChangeText={setEditDescription}
+              style={modalStyles.input}
+            />
+            <TextInput
+              placeholder="Quantity"
+              value={editQuantity}
+              onChangeText={(text) => /^\d*$/.test(text) && setEditQuantity(text)}
+              keyboardType="numeric"
+              style={modalStyles.input}
+            />
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <TouchableOpacity
+                onPress={handleEditSave}
+                disabled={editUploading}
+                style={[modalStyles.modalButton, { backgroundColor: "#3B82F6" }]}
+              >
+                {editUploading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={{ color: "#fff", fontWeight: "bold" }}>Save</Text>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={[modalStyles.modalButton, { backgroundColor: "#BB002D" }]}
+              >
+                <Text style={{ color: "#fff", fontWeight: "bold" }}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }

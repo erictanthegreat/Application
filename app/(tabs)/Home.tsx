@@ -1,8 +1,8 @@
+
 import React, { useEffect, useState } from "react";
 import { Platform, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from "react-native";
 import { Text, View } from "../../components/Themed";
 import { StatusBar } from "expo-status-bar";
-import Feather from "react-native-vector-icons/Feather";
 import { db, auth } from "../config/firebaseConfig";
 import {
   collection,
@@ -13,6 +13,8 @@ import {
   limit,
   doc,
   getDoc,
+  updateDoc, 
+  serverTimestamp
 } from "firebase/firestore";
 import { useRouter, useFocusEffect } from "expo-router";
 
@@ -25,6 +27,14 @@ const categoryEmojis: Record<string, string> = {
   'Perishables': '🍋',
   'Others': '📦',
 };
+
+export async function updateBoxWithLastModified(boxId: string, updatedData: any) {
+  const boxRef = doc(db, "boxes", boxId);
+  await updateDoc(boxRef, {
+    ...updatedData,
+    lastModifiedAt: serverTimestamp(),
+  });
+}
 
 export default function Home() {
   const [boxCount, setBoxCount] = useState(0);
@@ -95,11 +105,11 @@ export default function Home() {
       const userID = auth.currentUser?.uid;
       if (!userID) return;
 
-      // Fetch only 5 most recent boxes
+      // Fetch only 5 most recently modified boxes
       const recentBoxesQuery = query(
         collection(db, "boxes"),
         where("userID", "==", userID),
-        orderBy("createdAt", "desc"),
+        orderBy("lastModifiedAt", "desc"),
         limit(5)
       );
       const recentBoxesSnapshot = await getDocs(recentBoxesQuery);
@@ -179,8 +189,8 @@ export default function Home() {
         </Text>
       ) : (
         recentBoxes.map((box, index) => {
-          // Prefer lastModified, fallback to createdAt, else null
-          const lastModifiedTimestamp = box.lastModified || box.createdAt || null;
+          // Prefer lastModifiedAt, fallback to createdAt, else null
+          const lastModifiedTimestamp = box.lastModifiedAt || box.createdAt || null;
           let lastModifiedStr = "Unknown";
           if (lastModifiedTimestamp && typeof lastModifiedTimestamp.toDate === "function") {
             lastModifiedStr = lastModifiedTimestamp
