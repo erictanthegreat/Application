@@ -6,7 +6,6 @@ import {
   View,
   Text,
   ActivityIndicator,
-  ImageBackground,
   Pressable,
   TextInput,
   Modal,

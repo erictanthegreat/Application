@@ -164,6 +164,7 @@ export default function Home() {
           <Text style={styles.title}>Hi, {userName}</Text>
         </View>
       </View>
+      <View style={styles.divider} />
 
       {/* Stats Container */}
       <View style={styles.statsContainer}>
@@ -334,4 +335,17 @@ const styles = StyleSheet.create({
     color: "#888",
     marginTop: 2,
   },
+  divider: {
+  height: 1,
+  backgroundColor: "#D1D1D1",
+  marginHorizontal: 20,
+  marginBottom: 20,
+
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.2,
+  shadowRadius: 2,
+
+  elevation: 2,
+},
 });
