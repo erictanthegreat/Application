@@ -375,12 +375,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   itemBox: {
-    width: '48%',
-    borderRadius: 16,
-    marginBottom: 16,
-    backgroundColor: '#fff',
-    overflow: 'hidden',
-  },
+  width: '48%',
+  borderRadius: 16,
+  marginBottom: 16,
+  backgroundColor: '#fff',
+  overflow: 'hidden',
+  borderWidth: 1,
+  borderColor: '#ccc', // or any color you prefer
+},
   imageContainer: {
     width: '100%',
     aspectRatio: 1.2,

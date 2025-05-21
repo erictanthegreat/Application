@@ -109,9 +109,7 @@ export default function Login() {
                 borderColor: '#E0E0E0',
                 borderRadius: 8,
                 marginBottom: 0,
-                width: '100%',
-                height: 50,
-                paddingHorizontal: 12,
+                width: '100%'
             }}>
                 <TextInput
                     style={{
