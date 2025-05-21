@@ -1,10 +1,10 @@
-
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, Modal } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState, useRef } from "react";
 import { db } from "../config/firebaseConfig";
 import { doc, getDoc, deleteDoc, collection, getDocs } from "firebase/firestore";
 import { Feather } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import QRCode from 'react-native-qrcode-svg';
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
@@ -26,7 +26,7 @@ function getEmojiForCategory(category: string) {
     default:
       return "📦";
   }
-}  
+}
 
 export default function BoxDetails() {
   const params = useLocalSearchParams();
@@ -37,6 +37,11 @@ export default function BoxDetails() {
   const [qrModalVisible, setQrModalVisible] = useState(false);
   const [saving, setSaving] = useState(false);
   const qrRef = useRef<any>(null);
+
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [anySelected, setAnySelected] = useState(false);
+  const [allSelected, setAllSelected] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   if (!boxId || typeof boxId !== "string") {
     return (
@@ -60,7 +65,11 @@ export default function BoxDetails() {
 
         const itemsRef = collection(db, "boxes", boxId, "items");
         const itemsSnap = await getDocs(itemsRef);
-        const itemsList = itemsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const itemsList = itemsSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          checked: false,
+        }));
 
         setItems(itemsList);
       } catch (error) {
@@ -70,6 +79,17 @@ export default function BoxDetails() {
 
     fetchBoxAndItems();
   }, [boxId]);
+
+  useEffect(() => {
+    const any = items.some(item => item.checked);
+    const all = items.length > 0 && items.every(item => item.checked);
+    setAnySelected(any);
+    setAllSelected(all);
+
+    if (selectionMode && !any) {
+      setSelectionMode(false);
+    }
+  }, [items, selectionMode]);
 
   const handleDeleteBox = async () => {
     try {
@@ -96,7 +116,7 @@ export default function BoxDetails() {
 
   const navigateToAddItems = () => {
     router.push({
-      pathname: "./AddItems", 
+      pathname: "./AddItems",
       params: {
         boxId,
         boxName: boxData?.boxName || "",
@@ -126,10 +146,8 @@ export default function BoxDetails() {
     return output;
   }
 
-  // Data to embed in QR (offline version: formatted list)
   const qrData = generateFormattedList(boxData, items);
 
-  // Save QR code as image to gallery (Expo Go limitation: recommend screenshot for offline use)
   const handleSaveQrToGallery = async () => {
     if (!qrRef.current) return;
     setSaving(true);
@@ -154,6 +172,63 @@ export default function BoxDetails() {
     }
   };
 
+  const toggleCheckbox = (id: string) => {
+    setItems(prev =>
+      prev.map(item =>
+        item.id === id ? { ...item, checked: !item.checked } : item
+      )
+    );
+  };
+
+  const handleLongPressItem = (id: string) => {
+    if (!selectionMode) {
+      setSelectionMode(true);
+      setItems(prev =>
+        prev.map(item =>
+          item.id === id ? { ...item, checked: true } : item
+        )
+      );
+    }
+  };
+
+  const toggleSelectAll = () => {
+    setItems(prev =>
+      prev.map(item => ({ ...item, checked: !allSelected }))
+    );
+  };
+
+  const handleDeleteSelected = async () => {
+    const selectedItems = items.filter(item => item.checked);
+    if (selectedItems.length === 0) return;
+
+    Alert.alert(
+      "Delete Items",
+      `Are you sure you want to delete ${selectedItems.length} item(s)?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setDeleting(true);
+            try {
+              for (const item of selectedItems) {
+                await deleteDoc(doc(db, "boxes", boxId, "items", item.id));
+              }
+              setItems(prev => prev.filter(item => !selectedItems.some(sel => sel.id === item.id)));
+              Alert.alert("Success", "Selected items deleted.");
+            } catch (error) {
+              Alert.alert("Error", "Failed to delete items.");
+              console.error("Delete error:", error);
+            } finally {
+              setDeleting(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const handleDeleteItem = async (itemId: string) => {
     try {
       await deleteDoc(doc(db, "boxes", boxId, "items", itemId));
@@ -164,7 +239,7 @@ export default function BoxDetails() {
       Alert.alert("Error", "Failed to delete the item. Please try again.");
     }
   };
-  
+
   const confirmDeleteItem = (itemId: string) => {
     Alert.alert(
       "Delete Item",
@@ -213,26 +288,69 @@ export default function BoxDetails() {
         </Text>
       </View>
 
-      {/* Export QR Button */}
-      <TouchableOpacity
-        style={styles.exportQrButton}
-        onPress={() => setQrModalVisible(true)}
-      >
-        <Feather name="download" size={18} color="#fff" />
-        <Text style={styles.exportQrButtonText}>Export QR</Text>
-      </TouchableOpacity>
+      {/* Export QR or Select All/Delete */}
+      <View style={{ alignSelf: "stretch", marginBottom: 16 }}>
+        {selectionMode && anySelected ? (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 16, justifyContent: "flex-end" }}>
+            <TouchableOpacity onPress={toggleSelectAll} disabled={items.length === 0}>
+              <MaterialIcons
+                name={allSelected ? "check-box" : "check-box-outline-blank"}
+                size={30}
+                color={items.length === 0 ? "#ccc" : "#BB002D"}
+                style={{ marginRight: 8 }}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleDeleteSelected} disabled={deleting}>
+              <MaterialIcons
+                name="delete"
+                size={30}
+                color={deleting ? "#ccc" : "#BB002D"}
+              />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-end" }}>
+            <Text style={{ fontSize: 12, color: "#888", marginRight: 12, maxWidth: 180, textAlign: "right" }}>
+              Long press an item to select it!
+            </Text>
+            <TouchableOpacity
+              style={styles.exportQrButton}
+              onPress={() => setQrModalVisible(true)}
+            >
+              <Feather name="download" size={18} color="#fff" />
+              <Text style={styles.exportQrButtonText}>Export QR</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
 
       {/* Items List */}
       <View style={styles.itemsContainer}>
-  {items.length > 0 ? (
-    items.map((item, index) => (
-      <View key={item.id} style={styles.itemCard}>
-              {/* Item Image */}
+        {items.length > 0 ? (
+          items.map((item, index) => (
+            <View key={item.id} style={styles.itemCard}>
+              {/* Item Checkbox: only show in selection mode */}
+              {selectionMode && (
+                <TouchableOpacity
+                  style={styles.itemCheckbox}
+                  onPress={() => toggleCheckbox(item.id)}
+                >
+                  <MaterialIcons
+                    name={item.checked ? "check-box" : "check-box-outline-blank"}
+                    size={22}
+                    color="#000"
+                  />
+                </TouchableOpacity>
+              )}
+              {/* Item Image: shrink left margin if in selection mode */}
               <Image
                 source={{
                   uri: item.imageURL || "https://via.placeholder.com/200x200.png?text=No+Image"
                 }}
-                style={styles.itemImage}
+                style={[
+                  styles.itemImage,
+                  selectionMode && { marginLeft: 0 }
+                ]}
               />
               <View style={styles.itemInfoContainer}>
                 <Text style={styles.itemTitle}>{item.title || item.name}</Text>
@@ -243,13 +361,25 @@ export default function BoxDetails() {
                   <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
                 )}
               </View>
-              {/* Delete Icon */}
+              {/* Delete Icon: disabled in selection mode */}
               <TouchableOpacity
                 style={styles.iconButton}
                 onPress={() => confirmDeleteItem(item.id)}
+                disabled={selectionMode}
               >
                 <Feather name="trash-2" size={20} color="#FF3B30" />
               </TouchableOpacity>
+              {/* Overlay for long press to enter selection mode */}
+              {!selectionMode && (
+                <TouchableOpacity
+                  style={StyleSheet.absoluteFill}
+                  onLongPress={() => handleLongPressItem(item.id)}
+                  activeOpacity={1}
+                >
+                  {/* Transparent overlay for long press */}
+                  <View />
+                </TouchableOpacity>
+              )}
             </View>
           ))
         ) : (
@@ -358,7 +488,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: 8,
     alignSelf: "flex-end",
-    marginBottom: 16,
     gap: 8,
   },
   exportQrButtonText: {
@@ -380,18 +509,26 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 15,
     marginBottom: 12,
-    alignItems: "flex-start",
     width: "100%",
-    flexDirection: "row",  
+    flexDirection: "row",
+    alignItems: "center",
+    position: "relative",
+  },
+  itemCheckbox: {
+    marginRight: 10,
+    padding: 2,
+    borderRadius: 8,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    zIndex: 2,
   },
   itemImage: {
-    width: 60,  
+    width: 60,
     height: 60,
-    marginRight: 12,  
+    marginRight: 12,
     borderRadius: 8,
   },
   itemInfoContainer: {
-    flex: 1,  
+    flex: 1,
   },
   itemTitle: {
     fontSize: 18,

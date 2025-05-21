@@ -12,9 +12,10 @@ import {
   TextInput,
   Modal,
   FlatList,
+  Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, deleteDoc, doc } from 'firebase/firestore';
 import { db, auth } from '../config/firebaseConfig';
 import { useRouter } from 'expo-router';
 import Feather from "react-native-vector-icons/Feather";
@@ -45,6 +46,9 @@ export default function ViewBoxes() {
   const [filteredBoxes, setFilteredBoxes] = useState<Box[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>("All");
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [anySelected, setAnySelected] = useState(false);
+  const [allSelected, setAllSelected] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -83,12 +87,10 @@ export default function ViewBoxes() {
   useEffect(() => {
     let filtered = boxes;
 
-    // Filter by category if not "All"
     if (categoryFilter !== "All") {
       filtered = filtered.filter(box => box.category === categoryFilter);
     }
 
-    // Filter by search query
     if (searchQuery.trim()) {
       const lower = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -101,13 +103,61 @@ export default function ViewBoxes() {
     setFilteredBoxes(filtered);
   }, [searchQuery, boxes, categoryFilter]);
 
+  useEffect(() => {
+    const any = filteredBoxes.some(box => box.checked);
+    const all = filteredBoxes.length > 0 && filteredBoxes.every(box => box.checked);
+    setAnySelected(any);
+    setAllSelected(all);
+  }, [filteredBoxes]);
+
   const toggleCheckbox = (id: string) => {
     setBoxes(prev =>
       prev.map(box =>
         box.id === id ? { ...box, checked: !box.checked } : box
       )
     );
-    // filteredBoxes will update automatically via useEffect
+  };
+
+  const toggleSelectAll = () => {
+    setBoxes(prev =>
+      prev.map(box => {
+        if (filteredBoxes.some(fb => fb.id === box.id)) {
+          return { ...box, checked: !allSelected };
+        }
+        return box;
+      })
+    );
+  };
+
+  const handleDeleteSelected = async () => {
+    const selectedBoxes = filteredBoxes.filter(box => box.checked);
+    if (selectedBoxes.length === 0) return;
+
+    Alert.alert(
+      "Delete Boxes",
+      `Are you sure you want to delete ${selectedBoxes.length} box(es)?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setDeleting(true);
+            try {
+              for (const box of selectedBoxes) {
+                await deleteDoc(doc(db, "boxes", box.id));
+              }
+              setBoxes(prev => prev.filter(box => !selectedBoxes.some(sel => sel.id === box.id)));
+            } catch (error) {
+              Alert.alert("Error", "Failed to delete boxes.");
+              console.error("Delete error:", error);
+            } finally {
+              setDeleting(false);
+            }
+          }
+        }
+      ]
+    );
   };
 
   const categoryEmojis: Record<string, string> = {
@@ -138,12 +188,34 @@ export default function ViewBoxes() {
           <Text style={styles.title}>Boxes</Text>
         </View>
         <View style={styles.headerIcons}>
-          <TouchableOpacity onPress={() => setSearchVisible(v => !v)}>
-            <Feather name="search" size={30} color="black" style={styles.icon} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setCategoryModalVisible(true)}>
-            <Feather name="list" size={30} color="black" />
-          </TouchableOpacity>
+          {anySelected ? (
+            <>
+              <TouchableOpacity onPress={toggleSelectAll} disabled={filteredBoxes.length === 0}>
+                <MaterialIcons
+                  name={allSelected ? "check-box" : "check-box-outline-blank"}
+                  size={30}
+                  color={filteredBoxes.length === 0 ? "#ccc" : "#BB002D"}
+                  style={styles.icon}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleDeleteSelected} disabled={deleting}>
+                <MaterialIcons
+                  name="delete"
+                  size={30}
+                  color={deleting ? "#ccc" : "#BB002D"}
+                />
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <TouchableOpacity onPress={() => setSearchVisible(v => !v)}>
+                <Feather name="search" size={30} color="black" style={styles.icon} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setCategoryModalVisible(true)}>
+                <Feather name="list" size={30} color="black" />
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </View>
       {searchVisible && (
@@ -179,6 +251,7 @@ export default function ViewBoxes() {
             <View key={box.id} style={styles.itemBox}>
               <TouchableOpacity
                 onPress={() => router.push({ pathname: "/Boxes/BoxDetails", params: { boxId: box.id } })}
+                disabled={anySelected}
               >
                 <ImageBackground
                   source={{ uri: box.imageUrl }}
