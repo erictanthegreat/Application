@@ -89,7 +89,7 @@ export default function AddItemScreen() {
       return;
     }
 
-    let imageURL = "https://via.placeholder.com/200x200.png?text=No+Image";
+    let imageURL = "https://res.cloudinary.com/dzqc9kcyi/image/upload/v1747787534/image_2025-05-21_083214232_al7bpb.png";
 
     try {
       setUploading(true);
@@ -210,7 +210,7 @@ export default function AddItemScreen() {
       <Text className="text-2xl font-bold text-center">Add/Edit Item</Text>
 
       <Image
-        source={{ uri: image || "https://via.placeholder.com/200x200.png?text=No+Image" }}
+        source={{ uri: image || "https://res.cloudinary.com/dzqc9kcyi/image/upload/v1747787534/image_2025-05-21_083214232_al7bpb.png" }}
         style={{ width: "100%", height: 200, borderRadius: 10 }}
       />
 

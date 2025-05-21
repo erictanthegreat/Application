@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from "react";
-import { Platform, StyleSheet } from "react-native";
+import { Platform, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from "react-native";
 import { Text, View } from "../../components/Themed";
 import { StatusBar } from "expo-status-bar";
 import Feather from "react-native-vector-icons/Feather";
@@ -15,6 +14,7 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
+import { useRouter, useFocusEffect } from "expo-router";
 
 // Category emoji mapping
 const categoryEmojis: Record<string, string> = {
@@ -31,105 +31,127 @@ export default function Home() {
   const [mostUsedCategory, setMostUsedCategory] = useState<string | null>(null);
   const [recentBoxes, setRecentBoxes] = useState<any[]>([]);
   const [userName, setUserName] = useState<string>("");
+  const [profilePic, setProfilePic] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  useEffect(() => {
-    const fetchUserName = async () => {
-      try {
-        const userID = auth.currentUser?.uid;
-        if (!userID) return;
-        // Fetch user document from 'users' collection
-        const userDocRef = doc(db, "users", userID);
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data();
-          setUserName(userData.fullName || "User");
-        } else {
-          setUserName("User");
-        }
-      } catch (error) {
-        console.error("Error fetching user name:", error);
+  const fetchUserInfo = async () => {
+    try {
+      const userID = auth.currentUser?.uid;
+      if (!userID) return;
+      const userDocRef = doc(db, "users", userID);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        setUserName(userData.fullName || "User");
+        setProfilePic(userData.profilePic || null);
+      } else {
         setUserName("User");
+        setProfilePic(null);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching user name:", error);
+      setUserName("User");
+      setProfilePic(null);
+    }
+  };
 
-    const fetchStats = async () => {
-      try {
-        const userID = auth.currentUser?.uid;
-        if (!userID) return;
+  const fetchStats = async () => {
+    try {
+      const userID = auth.currentUser?.uid;
+      if (!userID) return;
 
-        // Fetch all boxes for stats
-        const allBoxesQuery = query(
-          collection(db, "boxes"),
-          where("userID", "==", userID)
-        );
-        const allBoxesSnapshot = await getDocs(allBoxesQuery);
-        const allBoxes = allBoxesSnapshot.docs.map((doc) => doc.data());
+      // Fetch all boxes for stats
+      const allBoxesQuery = query(
+        collection(db, "boxes"),
+        where("userID", "==", userID)
+      );
+      const allBoxesSnapshot = await getDocs(allBoxesQuery);
+      const allBoxes = allBoxesSnapshot.docs.map((doc) => doc.data());
 
-        setBoxCount(allBoxes.length);
+      setBoxCount(allBoxes.length);
 
-        if (allBoxes.length > 0) {
-          const categoryCount: Record<string, number> = {};
-          allBoxes.forEach((box: any) => {
-            const cat = box.category || "Others";
-            categoryCount[cat] = (categoryCount[cat] || 0) + 1;
-          });
+      if (allBoxes.length > 0) {
+        const categoryCount: Record<string, number> = {};
+        allBoxes.forEach((box: any) => {
+          const cat = box.category || "Others";
+          categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+        });
 
-          const mostUsed = Object.entries(categoryCount).reduce((a, b) =>
-            a[1] > b[1] ? a : b
-          )[0];
-          setMostUsedCategory(mostUsed);
-        } else {
-          setMostUsedCategory(null);
-        }
-      } catch (error) {
-        console.error("Error fetching box stats:", error);
+        const mostUsed = Object.entries(categoryCount).reduce((a, b) =>
+          a[1] > b[1] ? a : b
+        )[0];
+        setMostUsedCategory(mostUsed);
+      } else {
+        setMostUsedCategory(null);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching box stats:", error);
+    }
+  };
 
-    const fetchRecentBoxes = async () => {
-      try {
-        const userID = auth.currentUser?.uid;
-        if (!userID) return;
+  const fetchRecentBoxes = async () => {
+    try {
+      const userID = auth.currentUser?.uid;
+      if (!userID) return;
 
-        // Fetch only 5 most recent boxes
-        const recentBoxesQuery = query(
-          collection(db, "boxes"),
-          where("userID", "==", userID),
-          orderBy("createdAt", "desc"),
-          limit(5)
-        );
-        const recentBoxesSnapshot = await getDocs(recentBoxesQuery);
-        const boxes = recentBoxesSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+      // Fetch only 5 most recent boxes
+      const recentBoxesQuery = query(
+        collection(db, "boxes"),
+        where("userID", "==", userID),
+        orderBy("createdAt", "desc"),
+        limit(5)
+      );
+      const recentBoxesSnapshot = await getDocs(recentBoxesQuery);
+      const boxes = recentBoxesSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-        setRecentBoxes(boxes);
-      } catch (error) {
-        console.error("Error fetching recent boxes:", error);
-      }
-    };
+      setRecentBoxes(boxes);
+    } catch (error) {
+      console.error("Error fetching recent boxes:", error);
+    }
+  };
 
-    fetchUserName();
-    fetchStats();
-    fetchRecentBoxes();
-  }, []);
+  const fetchAll = async () => {
+    setLoading(true);
+    await Promise.all([fetchUserInfo(), fetchStats(), fetchRecentBoxes()]);
+    setLoading(false);
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchAll();
+    }, [])
+  );
 
   // Helper to get emoji for a category
   const getCategoryEmoji = (category?: string) =>
     categoryEmojis[category ?? "Others"] || categoryEmojis["Others"];
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#BB002D" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View>
+        <Image
+          source={
+            profilePic
+              ? { uri: profilePic }
+              : require("../../assets/images/Profile_icon.png")
+          }
+          style={styles.profilePicSmall}
+        />
+        <View style={{ flex: 1 }}>
           <Text style={styles.title}>Hi, {userName}</Text>
-          <Text style={styles.subtitle}>This is the home screen</Text>
-        </View>
-        <View style={styles.headerIcons}>
-          <Feather name="search" size={30} color="black" style={styles.icon} />
-          <Feather name="list" size={30} color="black" />
         </View>
       </View>
 
@@ -167,7 +189,16 @@ export default function Home() {
           }
 
           return (
-            <View key={box.id || index} style={styles.boxRow}>
+            <TouchableOpacity
+              key={box.id || index}
+              style={styles.boxRow}
+              onPress={() =>
+                router.push({
+                  pathname: "/Boxes/BoxDetails",
+                  params: { boxId: box.id },
+                })
+              }
+            >
               <Text style={styles.boxEmoji}>
                 {getCategoryEmoji(box.category)}
               </Text>
@@ -175,7 +206,7 @@ export default function Home() {
                 <Text style={styles.boxText}>{box.boxName || box.name || "Untitled Box"}</Text>
                 <Text style={styles.boxDate}>Last modified: {lastModifiedStr}</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           );
         })
       )}
@@ -192,12 +223,27 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingTop: 20,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 20,
     alignItems: "center",
     marginBottom: 20,
+  },
+  profilePicSmall: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1,
+    borderColor: "#D1D1D1",
+    marginRight: 12,
+    backgroundColor: "#eee",
   },
   title: {
     fontSize: 26,

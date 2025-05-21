@@ -1,9 +1,3 @@
-/* Authored by: Eric Tan Jr.
-Company: Nvchads
-Project: InvenTori
-Feature: [FEATURECODE-001] Boxes Screen
-Description: Let's the user see all of their boxes/containers.
-*/
 
 import React, { useEffect, useState } from 'react';
 import {
@@ -15,11 +9,15 @@ import {
   ActivityIndicator,
   ImageBackground,
   Pressable,
+  TextInput,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db, auth } from '../config/firebaseConfig';
 import { useRouter } from 'expo-router';
+import Feather from "react-native-vector-icons/Feather";
 
 interface Box {
   id: string;
@@ -29,9 +27,24 @@ interface Box {
   checked?: boolean;
 }
 
+const CATEGORY_OPTIONS = [
+  "All",
+  "Furniture",
+  "Devices",
+  "Appliances",
+  "Papers",
+  "Perishables",
+  "Others",
+];
+
 export default function ViewBoxes() {
   const [boxes, setBoxes] = useState<Box[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredBoxes, setFilteredBoxes] = useState<Box[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState<string>("All");
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -56,6 +69,7 @@ export default function ViewBoxes() {
         });
 
         setBoxes(fetchedBoxes);
+        setFilteredBoxes(fetchedBoxes);
       } catch (error) {
         console.error("Error fetching boxes:", error);
       } finally {
@@ -66,12 +80,34 @@ export default function ViewBoxes() {
     fetchBoxes();
   }, []);
 
+  useEffect(() => {
+    let filtered = boxes;
+
+    // Filter by category if not "All"
+    if (categoryFilter !== "All") {
+      filtered = filtered.filter(box => box.category === categoryFilter);
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const lower = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        box =>
+          box.boxName.toLowerCase().includes(lower) ||
+          box.category.toLowerCase().includes(lower)
+      );
+    }
+
+    setFilteredBoxes(filtered);
+  }, [searchQuery, boxes, categoryFilter]);
+
   const toggleCheckbox = (id: string) => {
     setBoxes(prev =>
       prev.map(box =>
         box.id === id ? { ...box, checked: !box.checked } : box
       )
     );
+    // filteredBoxes will update automatically via useEffect
   };
 
   const categoryEmojis: Record<string, string> = {
@@ -97,33 +133,112 @@ export default function ViewBoxes() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.grid}>
-        {boxes.map((box) => (
-          <View key={box.id} style={styles.itemBox}>
-            <TouchableOpacity
-              onPress={() => router.push({ pathname: "/Boxes/BoxDetails", params: { boxId: box.id } })}
-            >
-              <ImageBackground
-                source={{ uri: box.imageUrl }}
-                style={styles.imageContainer}
-                imageStyle={styles.image}
-              >
-                <View style={styles.emojiBadge}>
-                  <Text style={styles.emoji}>{getEmojiForCategory(box.category)}</Text>
-                </View>
-                <Pressable style={styles.checkbox} onPress={() => toggleCheckbox(box.id)}>
-                  <MaterialIcons
-                    name={box.checked ? "check-box" : "check-box-outline-blank"}
-                    size={22}
-                    color="#000"
-                  />
-                </Pressable>
-              </ImageBackground>
-            </TouchableOpacity>
-            <Text style={styles.itemText}>{box.boxName}</Text>
-          </View>
-        ))}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.title}>Boxes</Text>
+        </View>
+        <View style={styles.headerIcons}>
+          <TouchableOpacity onPress={() => setSearchVisible(v => !v)}>
+            <Feather name="search" size={30} color="black" style={styles.icon} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setCategoryModalVisible(true)}>
+            <Feather name="list" size={30} color="black" />
+          </TouchableOpacity>
+        </View>
       </View>
+      {searchVisible && (
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search by name or category..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          autoFocus
+        />
+      )}
+      {/* Show current category filter */}
+      <View style={styles.filterInfoContainer}>
+        <Text style={styles.filterInfoText}>
+          Category: <Text style={{ fontWeight: 'bold' }}>{categoryFilter}</Text>
+        </Text>
+        {categoryFilter !== "All" && (
+          <TouchableOpacity onPress={() => setCategoryFilter("All")}>
+            <Text style={styles.clearFilterText}>Clear</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      <View style={styles.grid}>
+        {filteredBoxes.length === 0 ? (
+          <View style={styles.noBoxesContainer}>
+            <Text style={styles.noBoxesTitle}>No boxes found</Text>
+            <Text style={styles.noBoxesText}>
+              You haven't created any boxes yet. Tap the "+" button to add your first box!
+            </Text>
+          </View>
+        ) : (
+          filteredBoxes.map((box) => (
+            <View key={box.id} style={styles.itemBox}>
+              <TouchableOpacity
+                onPress={() => router.push({ pathname: "/Boxes/BoxDetails", params: { boxId: box.id } })}
+              >
+                <ImageBackground
+                  source={{ uri: box.imageUrl }}
+                  style={styles.imageContainer}
+                  imageStyle={styles.image}
+                >
+                  <View style={styles.emojiBadge}>
+                    <Text style={styles.emoji}>{getEmojiForCategory(box.category)}</Text>
+                  </View>
+                  <Pressable style={styles.checkbox} onPress={() => toggleCheckbox(box.id)}>
+                    <MaterialIcons
+                      name={box.checked ? "check-box" : "check-box-outline-blank"}
+                      size={22}
+                      color="#000"
+                    />
+                  </Pressable>
+                </ImageBackground>
+              </TouchableOpacity>
+              <Text style={styles.itemText}>{box.boxName}</Text>
+            </View>
+          ))
+        )}
+      </View>
+      {/* Category Filter Modal */}
+      <Modal
+        visible={categoryModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCategoryModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPressOut={() => setCategoryModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Filter by Category</Text>
+            <FlatList
+              data={CATEGORY_OPTIONS}
+              keyExtractor={item => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.categoryOption,
+                    item === categoryFilter && styles.categoryOptionSelected
+                  ]}
+                  onPress={() => {
+                    setCategoryFilter(item);
+                    setCategoryModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.categoryOptionText}>
+                    {item !== "All" ? `${getEmojiForCategory(item)} ` : ""}{item}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </ScrollView>
   );
 }
@@ -132,6 +247,54 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: '#fff',
+    flexGrow: 1,
+    minHeight: '100%',
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: "#000",
+  },
+  headerIcons: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  icon: {
+    marginRight: 15,
+  },
+  searchInput: {
+    marginHorizontal: 20,
+    marginBottom: 10,
+    padding: 10,
+    borderRadius: 8,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    fontSize: 16,
+    backgroundColor: "#f5f5f5",
+  },
+  filterInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    marginLeft: 20,
+    gap: 10,
+  },
+  filterInfoText: {
+    fontSize: 15,
+    color: '#333',
+  },
+  clearFilterText: {
+    color: '#007AFF',
+    fontWeight: 'bold',
+    marginLeft: 10,
+    fontSize: 15,
   },
   grid: {
     flexDirection: 'row',
@@ -180,5 +343,59 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  noBoxesContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+    backgroundColor: '#fff',
+    width: '100%',
+  },
+  noBoxesTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#BB002D',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  noBoxesText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    width: 260,
+    maxHeight: 350,
+    alignItems: 'stretch',
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  categoryOption: {
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  categoryOptionSelected: {
+    backgroundColor: '#e6f0ff',
+  },
+  categoryOptionText: {
+    fontSize: 16,
+    color: '#222',
   },
 });
