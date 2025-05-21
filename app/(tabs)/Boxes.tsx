@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
@@ -249,29 +248,23 @@ export default function ViewBoxes() {
         ) : (
           filteredBoxes.map((box) => (
             <View key={box.id} style={styles.itemBox}>
-              <TouchableOpacity
-                onPress={() => router.push({ pathname: "/Boxes/BoxDetails", params: { boxId: box.id } })}
-                disabled={anySelected}
-              >
-                <ImageBackground
-                  source={{ uri: box.imageUrl }}
-                  style={styles.imageContainer}
-                  imageStyle={styles.image}
-                >
-                  <View style={styles.emojiBadge}>
-                    <Text style={styles.emoji}>{getEmojiForCategory(box.category)}</Text>
-                  </View>
-                  <Pressable style={styles.checkbox} onPress={() => toggleCheckbox(box.id)}>
-                    <MaterialIcons
-                      name={box.checked ? "check-box" : "check-box-outline-blank"}
-                      size={22}
-                      color="#000"
-                    />
-                  </Pressable>
-                </ImageBackground>
-              </TouchableOpacity>
-              <Text style={styles.itemText}>{box.boxName}</Text>
-            </View>
+            <TouchableOpacity
+            onPress={() => router.push({ pathname: "/Boxes/BoxDetails", params: { boxId: box.id } })}
+            disabled={anySelected}
+            >
+          <View style={styles.emojiContainer}>
+          <Text style={styles.bigEmoji}>{getEmojiForCategory(box.category)}</Text>
+          </View>
+          </TouchableOpacity>
+          <Pressable style={styles.checkbox} onPress={() => toggleCheckbox(box.id)}>
+          <MaterialIcons
+            name={box.checked ? "check-box" : "check-box-outline-blank"}
+            size={22}
+            color="#000"
+          />
+          </Pressable>
+          <Text style={styles.itemText}>{box.boxName}</Text>
+        </View>
           ))
         )}
       </View>
@@ -382,6 +375,8 @@ const styles = StyleSheet.create({
   overflow: 'hidden',
   borderWidth: 1,
   borderColor: '#ccc',
+  position: 'relative', 
+  paddingBottom: 12, 
 },
   imageContainer: {
     width: '100%',
@@ -403,17 +398,21 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   checkbox: {
-    alignSelf: 'flex-end',
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderRadius: 12,
-    padding: 2,
-  },
+  position: 'absolute',
+  bottom: 8,
+  right: 8,
+  backgroundColor: '#fff',
+  borderRadius: 12,
+  padding: 2,
+  zIndex: 1,
+},
   itemText: {
-    fontSize: 14,
-    color: '#000',
-    textAlign: 'center',
-    marginTop: 6,
-  },
+  fontSize: 15,
+  fontWeight: 'bold',
+  color: '#000',
+  textAlign: 'center',
+  marginTop: 8,
+},
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -473,4 +472,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#222',
   },
+ emojiContainer: {
+  width: '100%',
+  aspectRatio: 1.2,
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: '#f9f9f9',
+  borderRadius: 12,
+},
+bigEmoji: {
+  fontSize: 110, //nice
+},
 });
