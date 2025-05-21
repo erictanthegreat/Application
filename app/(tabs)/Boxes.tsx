@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   backgroundColor: '#fff',
   overflow: 'hidden',
   borderWidth: 1,
-  borderColor: '#ccc', // or any color you prefer
+  borderColor: '#ccc',
 },
   imageContainer: {
     width: '100%',
