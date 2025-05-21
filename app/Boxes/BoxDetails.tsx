@@ -154,6 +154,29 @@ export default function BoxDetails() {
     }
   };
 
+  const handleDeleteItem = async (itemId: string) => {
+    try {
+      await deleteDoc(doc(db, "boxes", boxId, "items", itemId));
+      setItems(prev => prev.filter(item => item.id !== itemId));
+      Alert.alert("Success", "Item deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      Alert.alert("Error", "Failed to delete the item. Please try again.");
+    }
+  };
+  
+  const confirmDeleteItem = (itemId: string) => {
+    Alert.alert(
+      "Delete Item",
+      "Are you sure you want to delete this item?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: () => handleDeleteItem(itemId) }
+      ],
+      { cancelable: true }
+    );
+  };
+
   if (!boxData) {
     return (
       <View style={styles.center}>
@@ -201,13 +224,13 @@ export default function BoxDetails() {
 
       {/* Items List */}
       <View style={styles.itemsContainer}>
-        {items.length > 0 ? (
-          items.map((item, index) => (
-            <View key={item.id} style={styles.itemCard}>
-              {/* Item Image (1x1 aspect ratio) */}
+  {items.length > 0 ? (
+    items.map((item, index) => (
+      <View key={item.id} style={styles.itemCard}>
+              {/* Item Image */}
               <Image
                 source={{
-                  uri: item.imageURL || "https://res.cloudinary.com/dzqc9kcyi/image/upload/v1747787534/image_2025-05-21_083214232_al7bpb.png"
+                  uri: item.imageURL || "https://via.placeholder.com/200x200.png?text=No+Image"
                 }}
                 style={styles.itemImage}
               />
@@ -220,6 +243,13 @@ export default function BoxDetails() {
                   <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
                 )}
               </View>
+              {/* Delete Icon */}
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={() => confirmDeleteItem(item.id)}
+              >
+                <Feather name="trash-2" size={20} color="#FF3B30" />
+              </TouchableOpacity>
             </View>
           ))
         ) : (
