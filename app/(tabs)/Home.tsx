@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "400",
     color: "#000",
     marginTop: 4,
   },
